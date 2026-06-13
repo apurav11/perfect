@@ -632,9 +632,7 @@
       let text    = document.getElementById('comment-textarea').value.trim();
       let product = currentProduct.name;
 
-      // Basic validation
-      if (!name) { showToast('⚠️ Please enter your name'); return; }
-      if (!text)  { showToast('⚠️ Please write a comment'); return; }
+
 
       // Build comment object
       let comment = {
