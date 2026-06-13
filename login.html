@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfect Sales Entp. - Login</title>
+  <style>
+
+    /* ===== RESET ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ===== FULL PAGE BACKGROUND ===== */
+    body {
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 60%, #1a2a3a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* ===== TOP FIRM NAME HEADER ===== */
+    .firm-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    /* Gold decorative line above firm name */
+    .firm-header .top-line {
+      width: 60px;
+      height: 3px;
+      background: #f39c12;
+      margin: 0 auto 14px;
+      border-radius: 2px;
+    }
+
+    /* Main firm name */
+    .firm-header h1 {
+      font-size: 32px;
+      color: #f39c12;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Entp. in smaller text */
+    .firm-header h1 span {
+      font-size: 20px;
+      color: #f8c471;
+    }
+
+    /* Hindi welcome line below firm name */
+    .firm-header .hindi-welcome {
+      font-size: 15px;
+      color: #aab8c2;
+      margin-top: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Gold decorative line below firm name */
+    .firm-header .bottom-line {
+      width: 60px;
+      height: 3px;
+      background: #f39c12;
+      margin: 14px auto 0;
+      border-radius: 2px;
+    }
+
+    /* ===== LOGIN CARD BOX ===== */
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    /* Login card heading */
+    .login-card .card-title {
+      text-align: center;
+      font-size: 20px;
+      color: #2c3e50;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    /* Hindi subtitle inside card */
+    .login-card .card-subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 28px;
+    }
+
+    /* ===== FORM FIELD GROUP ===== */
+    .field-group {
+      margin-bottom: 18px;
+    }
+
+    /* Label above each input */
+    .field-group label {
+      display: block;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    /* Hindi label text */
+    .field-group label .hindi {
+      font-size: 12px;
+      color: #aaa;
+      font-weight: normal;
+      margin-left: 4px;
+    }
+
+    /* Input fields */
+    .field-group input,
+    .field-group select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 15px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      color: #2c3e50;
+      background: #fafafa;
+      transition: border-color 0.2s;
+    }
+
+    /* Input focus highlight */
+    .field-group input:focus,
+    .field-group select:focus {
+      border-color: #f39c12;
+      background: white;
+    }
+
+    /* Phone number field with +91 prefix */
+    .phone-wrap {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* +91 box */
+    .phone-prefix {
+      background: #f4f4f4;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 15px;
+      color: #555;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+
+    .phone-wrap input {
+      flex: 1;
+    }
+
+    /* ===== LOGIN BUTTON ===== */
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    .login-btn:hover { background: #1a252f; }
+
+    /* ===== ERROR MESSAGE ===== */
+    .error-msg {
+      display: none;
+      background: #fdecea;
+      color: #e74c3c;
+      border: 1px solid #f5c6cb;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .error-msg.show { display: block; }
+
+    /* ===== FOOTER TEXT ===== */
+    .footer-text {
+      text-align: center;
+      color: #7f8c8d;
+      font-size: 12px;
+      margin-top: 24px;
+    }
+
+    .footer-text span {
+      color: #f39c12;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ===== FIRM NAME WELCOME HEADER ===== -->
+  <div class="firm-header">
+    <div class="top-line"></div>
+    <h1>Perfect Sales <span>Entp.</span></h1>
+    <p class="hindi-welcome">आपका स्वागत है — Welcome</p>
+    <div class="bottom-line"></div>
+  </div>
+
+  <!-- ===== LOGIN CARD ===== -->
+  <div class="login-card">
+
+    <p class="card-title">Customer Login</p>
+    <p class="card-subtitle">अपनी जानकारी भरें — Fill in your details</p>
+
+    <!-- Error message shown if fields are empty -->
+    <div class="error-msg" id="error-msg">
+      ⚠️ कृपया सभी जानकारी भरें — Please fill all fields
+    </div>
+
+    <!-- ===== PHONE NUMBER FIELD ===== -->
+    <div class="field-group">
+      <label>
+        Phone Number
+        <span class="hindi">— मोबाइल नंबर</span>
+      </label>
+      <div class="phone-wrap">
+        <div class="phone-prefix">+91</div>
+        <input
+          type="tel"
+          id="phone"
+          maxlength="10"
+          placeholder="Enter 10 digit number"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+        />
+      </div>
+    </div>
+
+    <!-- ===== SHOP NAME FIELD ===== -->
+    <div class="field-group">
+      <label>
+        Shop Name
+        <span class="hindi">— दुकान का नाम</span>
+      </label>
+      <input
+        type="text"
+        id="shop-name"
+        placeholder="e.g. Sharma General Store"
+      />
+    </div>
+
+    <!-- ===== AREA FIELD ===== -->
+    <div class="field-group">
+      <label>
+        Area / Location
+        <span class="hindi">— क्षेत्र / पता</span>
+      </label>
+      <input
+        type="text"
+        id="area"
+        placeholder="e.g. Sector 22, Chandigarh"
+      />
+    </div>
+
+    <!-- ===== LOGIN BUTTON ===== -->
+    <button class="login-btn" onclick="handleLogin()">
+      दुकान में जाएं — Enter Shop →
+    </button>
+
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <p class="footer-text">
+    Powered by <span>Perfect Sales Entp.</span> &nbsp;|&nbsp; Chandigarh
+  </p>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+
+    // ---- FUNCTION: Handle login button click ----
+    function handleLogin() {
+
+      // Read values from all three fields
+      let phone    = document.getElementById('phone').value.trim();
+      let shopName = document.getElementById('shop-name').value.trim();
+      let area     = document.getElementById('area').value.trim();
+
+      let errorMsg = document.getElementById('error-msg');
+
+      // Check if phone number is exactly 10 digits
+      if (phone.length !== 10) {
+        errorMsg.textContent = '⚠️ कृपया सही 10 अंकों का नंबर डालें — Enter valid 10 digit number';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      // Check if shop name is filled
+      if (shopName === '') {
+        errorMsg.textContent = '⚠️ दुकान का नाम भरें — Please enter shop name';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      // Check if area is filled
+      if (area === '') {
+        errorMsg.textContent = '⚠️ क्षेत्र भरें — Please enter your area';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      // Hide error if everything is filled
+      errorMsg.classList.remove('show');
+
+      // Save customer details in browser session
+      // So index.html can show their name after login
+      sessionStorage.setItem('customer_phone',    phone);
+      sessionStorage.setItem('customer_shop',     shopName);
+      sessionStorage.setItem('customer_area',     area);
+
+      // Redirect to main shop page
+      window.location.href = 'index.html';
+    }
+
+    // ---- Allow pressing Enter key to submit ----
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { handleLogin(); }
+    });
+
+  </script>
+
+</body>
+</html>
