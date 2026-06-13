@@ -1,9 +1,529 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Shop</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Shop - Distribution Store</title>
+
+  <!-- ===== STYLES: Controls how the page looks ===== -->
+  <style>
+
+    /* --- Reset: removes default browser spacing --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* --- Body: overall page background and font --- */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    /* ===== TOP NAVIGATION BAR ===== */
+    .navbar {
+      background-color: #2c3e50;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Shop name on the left */
+    .navbar .logo {
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    /* Cart button on the right */
+    .navbar .cart-btn {
+      background-color: #e67e22;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .navbar .cart-btn:hover {
+      background-color: #d35400;
+    }
+
+    /* ===== HERO BANNER ===== */
+    .hero {
+      background-color: #2980b9;
+      color: white;
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .hero .shop-btn {
+      background-color: #e67e22;
+      color: white;
+      padding: 12px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* ===== SECTION HEADING ===== */
+    .section-title {
+      text-align: center;
+      font-size: 28px;
+      margin: 40px 0 20px;
+      color: #2c3e50;
+    }
+
+    /* ===== PRODUCT GRID: displays cards in rows ===== */
+    .product-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px 30px 40px;
+    }
+
+    /* ===== SINGLE PRODUCT CARD ===== */
+    .product-card {
+      background-color: white;
+      border-radius: 8px;
+      width: 220px;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    /* Product image area */
+    .product-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+      background-color: #eee;
+    }
+
+    /* Placeholder image when no real image is used */
+    .product-card .img-placeholder {
+      width: 100%;
+      height: 150px;
+      background-color: #dce3ea;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    /* Product name */
+    .product-card h3 {
+      font-size: 16px;
+      margin: 10px 0 5px;
+      color: #2c3e50;
+    }
+
+    /* Product price */
+    .product-card .price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #27ae60;
+      margin-bottom: 5px;
+    }
+
+    /* Stock availability */
+    .product-card .stock {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+
+    /* Stock low warning */
+    .product-card .stock.low {
+      color: #e74c3c;
+    }
+
+    /* Add to Cart button */
+    .product-card .add-btn {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .product-card .add-btn:hover {
+      background-color: #1a252f;
+    }
+
+    /* ===== CART SIDEBAR ===== */
+    .cart-sidebar {
+      position: fixed;        /* stays on screen while scrolling */
+      top: 0;
+      right: -350px;          /* hidden off screen by default */
+      width: 340px;
+      height: 100%;
+      background: white;
+      border-left: 2px solid #ddd;
+      padding: 20px;
+      transition: right 0.3s ease;  /* smooth slide animation */
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    /* When cart is open, it slides in */
+    .cart-sidebar.open {
+      right: 0;
+    }
+
+    .cart-sidebar h2 {
+      font-size: 22px;
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+
+    /* Close cart button */
+    .close-cart {
+      float: right;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: #888;
+    }
+
+    /* Each item in cart */
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .cart-item .item-name {
+      flex: 1;
+      color: #2c3e50;
+    }
+
+    .cart-item .item-price {
+      color: #27ae60;
+      font-weight: bold;
+      margin: 0 10px;
+    }
+
+    /* Remove item button */
+    .cart-item .remove-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* Cart total */
+    .cart-total {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    /* Checkout button */
+    .checkout-btn {
+      margin-top: 15px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .checkout-btn:hover {
+      background-color: #1e8449;
+    }
+
+    /* Empty cart message */
+    .empty-cart {
+      color: #aaa;
+      text-align: center;
+      margin-top: 30px;
+      font-size: 15px;
+    }
+
+    /* ===== DARK OVERLAY behind cart ===== */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background-color: #2c3e50;
+      color: #ccc;
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+    }
+
+  </style>
 </head>
+
 <body>
-    <h1>Welcome to My Distribution Shop hhhdh hhdhhh</h1>
+
+  <!-- ===== NAVIGATION BAR ===== -->
+  <nav class="navbar">
+    <a class="logo" href="#">MyShop</a>
+    <!-- Cart button shows number of items -->
+    <button class="cart-btn" onclick="openCart()">
+      Cart (<span id="cart-count">0</span>)
+    </button>
+  </nav>
+
+  <!-- ===== HERO BANNER ===== -->
+  <div class="hero">
+    <h1>Welcome to MyShop</h1>
+    <p>Quality goods delivered to your door</p>
+    <a class="shop-btn" href="#products">Shop Now</a>
+  </div>
+
+  <!-- ===== PRODUCT SECTION ===== -->
+  <h2 class="section-title" id="products">Our Products</h2>
+
+  <!-- Product Grid: add more product cards here as needed -->
+  <div class="product-grid">
+
+    <!-- ===== PRODUCT CARD 1 ===== -->
+    <div class="product-card">
+      <div class="img-placeholder">📦</div>
+      <h3>Premium Rice (5kg)</h3>
+      <p class="price">₹299</p>
+      <p class="stock">In Stock: 50 units</p>
+      <!-- onclick calls addToCart with product name and price -->
+      <button class="add-btn" onclick="addToCart('Premium Rice (5kg)', 299)">
+        Add to Cart
+      </button>
+    </div>
+
+    <!-- ===== PRODUCT CARD 2 ===== -->
+    <div class="product-card">
+      <div class="img-placeholder">🧴</div>
+      <h3>Cooking Oil (1L)</h3>
+      <p class="price">₹150</p>
+      <p class="stock">In Stock: 30 units</p>
+      <button class="add-btn" onclick="addToCart('Cooking Oil (1L)', 150)">
+        Add to Cart
+      </button>
+    </div>
+
+    <!-- ===== PRODUCT CARD 3 ===== -->
+    <div class="product-card">
+      <div class="img-placeholder">🧹</div>
+      <h3>Broom Set</h3>
+      <p class="price">₹120</p>
+      <p class="stock low">Low Stock: 5 units</p>
+      <button class="add-btn" onclick="addToCart('Broom Set', 120)">
+        Add to Cart
+      </button>
+    </div>
+
+    <!-- ===== PRODUCT CARD 4 ===== -->
+    <div class="product-card">
+      <div class="img-placeholder">🪣</div>
+      <h3>Plastic Bucket</h3>
+      <p class="price">₹85</p>
+      <p class="stock">In Stock: 100 units</p>
+      <button class="add-btn" onclick="addToCart('Plastic Bucket', 85)">
+        Add to Cart
+      </button>
+    </div>
+
+    <!-- ===== PRODUCT CARD 5 ===== -->
+    <div class="product-card">
+      <div class="img-placeholder">🧼</div>
+      <h3>Soap Bar (Pack of 4)</h3>
+      <p class="price">₹60</p>
+      <p class="stock">In Stock: 200 units</p>
+      <button class="add-btn" onclick="addToCart('Soap Bar (Pack of 4)', 60)">
+        Add to Cart
+      </button>
+    </div>
+
+    <!-- ===== PRODUCT CARD 6 ===== -->
+    <div class="product-card">
+      <div class="img-placeholder">🫙</div>
+      <h3>Sugar (2kg)</h3>
+      <p class="price">₹95</p>
+      <p class="stock low">Low Stock: 8 units</p>
+      <button class="add-btn" onclick="addToCart('Sugar (2kg)', 95)">
+        Add to Cart
+      </button>
+    </div>
+
+  </div><!-- end product-grid -->
+
+  <!-- ===== DARK OVERLAY (behind cart sidebar) ===== -->
+  <div class="overlay" id="overlay" onclick="closeCart()"></div>
+
+  <!-- ===== CART SIDEBAR ===== -->
+  <div class="cart-sidebar" id="cartSidebar">
+    <button class="close-cart" onclick="closeCart()">✕</button>
+    <h2>Your Cart</h2>
+
+    <!-- Cart items will appear here automatically via JavaScript -->
+    <div id="cart-items">
+      <p class="empty-cart">Your cart is empty</p>
+    </div>
+
+    <!-- Total price -->
+    <div class="cart-total" id="cart-total" style="display:none;">
+      Total: ₹<span id="total-price">0</span>
+    </div>
+
+    <!-- Checkout button -->
+    <button class="checkout-btn" id="checkout-btn"
+            style="display:none;"
+            onclick="alert('Checkout coming soon!')">
+      Proceed to Checkout
+    </button>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <p>&copy; 2024 MyShop. All rights reserved.</p>
+  </footer>
+
+  <!-- ===== JAVASCRIPT: handles cart logic ===== -->
+  <script>
+
+    // This array stores all items added to the cart
+    // Each item = { name: "...", price: 000 }
+    let cartItems = [];
+
+    // ---- FUNCTION: Add item to cart ----
+    // Called when user clicks "Add to Cart" button
+    function addToCart(name, price) {
+
+      // Check if item already exists in cart
+      let existingItem = cartItems.find(item => item.name === name);
+
+      if (existingItem) {
+        // If already in cart, increase quantity by 1
+        existingItem.quantity += 1;
+      } else {
+        // If new item, add it to the cart array
+        cartItems.push({ name: name, price: price, quantity: 1 });
+      }
+
+      // Update what is shown on screen
+      updateCartDisplay();
+
+      // Open the cart sidebar automatically
+      openCart();
+    }
+
+    // ---- FUNCTION: Remove item from cart ----
+    function removeFromCart(index) {
+      // Remove 1 item at the given position
+      cartItems.splice(index, 1);
+      // Update what is shown on screen
+      updateCartDisplay();
+    }
+
+    // ---- FUNCTION: Update the cart display on screen ----
+    function updateCartDisplay() {
+
+      // Get the HTML elements we need to update
+      let cartItemsDiv = document.getElementById('cart-items');
+      let cartCount    = document.getElementById('cart-count');
+      let totalPrice   = document.getElementById('total-price');
+      let cartTotal    = document.getElementById('cart-total');
+      let checkoutBtn  = document.getElementById('checkout-btn');
+
+      // Count total number of items
+      let totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+      cartCount.textContent = totalItems;
+
+      // If cart is empty, show empty message
+      if (cartItems.length === 0) {
+        cartItemsDiv.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
+        cartTotal.style.display   = 'none';
+        checkoutBtn.style.display = 'none';
+        return;
+      }
+
+      // Build the HTML for each cart item
+      let html = '';
+      let total = 0;
+
+      cartItems.forEach(function(item, index) {
+        let itemTotal = item.price * item.quantity;
+        total += itemTotal;
+
+        html += `
+          <div class="cart-item">
+            <span class="item-name">${item.name} x${item.quantity}</span>
+            <span class="item-price">₹${itemTotal}</span>
+            <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
+          </div>
+        `;
+      });
+
+      // Put the HTML into the cart sidebar
+      cartItemsDiv.innerHTML = html;
+
+      // Show the total price
+      totalPrice.textContent    = total;
+      cartTotal.style.display   = 'block';
+      checkoutBtn.style.display = 'block';
+    }
+
+    // ---- FUNCTION: Open cart sidebar ----
+    function openCart() {
+      document.getElementById('cartSidebar').classList.add('open');
+      document.getElementById('overlay').classList.add('active');
+    }
+
+    // ---- FUNCTION: Close cart sidebar ----
+    function closeCart() {
+      document.getElementById('cartSidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('active');
+    }
+
+  </script>
+
 </body>
 </html>
