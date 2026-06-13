@@ -211,10 +211,22 @@
 
   <!-- ===== NAVIGATION BAR ===== -->
   <nav class="navbar">
-    <a class="logo" href="#">MyShop</a>
-    <div class="cart-btn-wrap">
-      <button class="cart-btn" onclick="openCart()">🛒 Cart</button>
-      <div class="cart-badge" id="cart-badge">0</div>
+    <div>
+      <a class="logo" href="#">Perfect Sales Entp.</a>
+      <!-- Shows customer shop name after login -->
+      <div id="customer-greeting" style="color:#f8c471; font-size:16px; margin-top:3px;"></div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <!-- Logout button -->
+      <button onclick="logout()"
+        style="background:none; border:1px solid #aaa; color:#aaa;
+               padding:5px 12px; border-radius:4px; cursor:pointer; font-size:13px;">
+        Logout
+      </button>
+      <div class="cart-btn-wrap">
+        <button class="cart-btn" onclick="openCart()">🛒 Cart</button>
+        <div class="cart-badge" id="cart-badge">0</div>
+      </div>
     </div>
   </nav>
 
@@ -354,7 +366,7 @@
     // price parameter removed
     function openPopup(emoji, name, stockText, isLow) {
 
-      document.getElementById('popup-emoji').textContent = emoji;
+      document.getElementById('popup-emoji').textContent = welcome;
       document.getElementById('popup-name').textContent  = name;
 
       let stockEl = document.getElementById('popup-stock');
@@ -498,6 +510,36 @@
       toast.classList.add('show');
       setTimeout(() => { toast.classList.remove('show'); }, 2500);
     }
+
+
+    // ---- FUNCTION: Check if customer is logged in ----
+    // Runs as soon as page loads
+    function checkLogin() {
+      let phone    = sessionStorage.getItem('customer_phone');
+      let shopName = sessionStorage.getItem('customer_shop');
+      let area     = sessionStorage.getItem('customer_area');
+
+      // If not logged in, send back to login page
+      if (!phone || !shopName || !area) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Show greeting in navbar
+      document.getElementById('customer-greeting').textContent =
+        'Welcome ' + shopName + ', ' + area;
+    }
+
+
+    // ---- FUNCTION: Logout ----
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+
+    // Run login check when page loads
+    checkLogin();
 
   </script>
 
