@@ -9,44 +9,51 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; }
 
-    /* ===== NAVBAR ===== */
+    /* ===== NAVIGATION BAR ===== */
     .navbar {
-      background-color: #2c3e50; padding: 15px 30px;
-      display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; z-index: 100;
+      background-color: #2c3e50;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     .navbar .logo { color: white; font-size: 24px; font-weight: bold; text-decoration: none; }
     .cart-btn-wrap { position: relative; display: inline-block; }
     .navbar .cart-btn {
-      background-color: #e67e22; color: white; border: none;
-      padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer;
+      background-color: #e67e22; color: white;
+      border: none; padding: 10px 20px;
+      font-size: 16px; border-radius: 5px; cursor: pointer;
     }
     .navbar .cart-btn:hover { background-color: #d35400; }
     .cart-badge {
       position: absolute; top: -8px; right: -8px;
-      background: #e74c3c; color: white; border-radius: 50%;
-      width: 22px; height: 22px; font-size: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: bold; display: none;
+      background: #e74c3c; color: white;
+      border-radius: 50%; width: 22px; height: 22px;
+      font-size: 12px; font-weight: bold;
+      display: none; align-items: center; justify-content: center;
     }
 
-    /* ===== HERO ===== */
+    /* ===== HERO BANNER ===== */
     .hero { background-color: #2980b9; color: white; text-align: center; padding: 50px 20px; }
     .hero h1 { font-size: 36px; margin-bottom: 10px; }
     .hero p { font-size: 18px; margin-bottom: 20px; }
     .hero .shop-btn {
       background-color: #e67e22; color: white;
-      padding: 12px 30px; font-size: 16px; border: none;
-      border-radius: 5px; cursor: pointer; text-decoration: none;
+      padding: 12px 30px; font-size: 16px;
+      border: none; border-radius: 5px; cursor: pointer; text-decoration: none;
     }
 
-    /* ===== SECTION TITLE ===== */
+    /* ===== SECTION HEADING ===== */
     .section-title { text-align: center; font-size: 28px; margin: 40px 0 20px; color: #2c3e50; }
 
     /* ===== PRODUCT GRID ===== */
     .product-grid {
       display: flex; flex-wrap: wrap;
-      justify-content: center; gap: 20px; padding: 20px 30px 40px;
+      justify-content: center;
+      gap: 20px; padding: 20px 30px 40px;
     }
 
     /* ===== PRODUCT CARD ===== */
@@ -63,28 +70,28 @@
     }
     .product-card .img-placeholder {
       width: 100%; height: 150px; background-color: #dce3ea;
-      border-radius: 5px; display: flex; align-items: center;
-      justify-content: center; font-size: 50px; margin-bottom: 10px;
+      border-radius: 5px; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 50px; margin-bottom: 10px;
     }
     .product-card h3 { font-size: 16px; margin: 10px 0 5px; color: #2c3e50; }
     .product-card .price { font-size: 18px; font-weight: bold; color: #27ae60; margin-bottom: 5px; }
-    .product-card .stock { font-size: 13px; color: #888; margin-bottom: 12px; }
+    .product-card .stock { font-size: 13px; color: #888; margin-bottom: 8px; }
     .product-card .stock.low { color: #e74c3c; }
-    .product-card .tap-hint { font-size: 12px; color: #aaa; margin-top: 8px; }
+    .product-card .tap-hint { font-size: 12px; color: #aaa; }
 
-    /* ===== POPUP OVERLAY ===== */
+    /* ===== PRODUCT POPUP OVERLAY ===== */
     .popup-overlay {
-      display: none; position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
       z-index: 500; align-items: center; justify-content: center;
     }
     .popup-overlay.active { display: flex; }
 
-    /* ===== POPUP BOX (taller now to fit comments) ===== */
     .popup-box {
-      background: white; border-radius: 12px; padding: 30px;
-      width: 420px; max-width: 94vw;
-      max-height: 90vh; overflow-y: auto;
+      background: white; border-radius: 12px;
+      padding: 30px; width: 380px; max-width: 90vw;
       position: relative; text-align: center;
       animation: popIn 0.2s ease;
     }
@@ -94,8 +101,8 @@
     }
     .popup-close {
       position: absolute; top: 12px; right: 16px;
-      background: none; border: none; font-size: 22px;
-      cursor: pointer; color: #888;
+      background: none; border: none;
+      font-size: 22px; cursor: pointer; color: #888;
     }
     .popup-close:hover { color: #333; }
     .popup-emoji { font-size: 70px; margin-bottom: 15px; }
@@ -104,10 +111,10 @@
     .popup-box .popup-stock { font-size: 14px; color: #888; margin-bottom: 20px; }
     .popup-box .popup-stock.low { color: #e74c3c; }
 
-    /* ===== QTY SELECTOR ===== */
+    /* ===== QUANTITY SELECTOR ===== */
     .qty-selector {
-      display: flex; align-items: center; justify-content: center;
-      gap: 16px; margin-bottom: 20px;
+      display: flex; align-items: center;
+      justify-content: center; gap: 16px; margin-bottom: 16px;
     }
     .qty-btn {
       width: 38px; height: 38px; border-radius: 50%;
@@ -117,132 +124,49 @@
     }
     .qty-btn:hover { background: #2c3e50; color: white; }
     .qty-number { font-size: 24px; font-weight: bold; color: #2c3e50; min-width: 30px; text-align: center; }
-    .popup-subtotal { font-size: 15px; color: #555; margin-bottom: 20px; }
+    .popup-subtotal { font-size: 15px; color: #555; margin-bottom: 16px; }
     .popup-subtotal span { font-weight: bold; color: #2c3e50; }
+
+    /* ========================================
+       NEW: COMMENT BOX STYLES
+       Controls how the comment textarea looks
+       ======================================== */
+    .comment-wrap {
+      text-align: left;
+      margin-bottom: 18px;
+      border: 2px dashed #f39c12;      /* orange dashed border to highlight this section */
+      border-radius: 8px;
+      padding: 12px;
+      background-color: #fffbf2;       /* light yellow background to make it stand out */
+    }
+    .comment-wrap label {
+      font-size: 14px;
+      color: #555;
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    .comment-wrap textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      resize: none;
+      font-family: Arial;
+      outline: none;
+    }
+    .comment-wrap textarea:focus {
+      border-color: #f39c12;           /* orange border when customer clicks inside */
+    }
+    /* ======================================== */
+
     .popup-add-btn {
-      background-color: #2c3e50; color: white; border: none;
-      padding: 13px 0; width: 100%; font-size: 16px;
-      border-radius: 8px; cursor: pointer;
+      background-color: #2c3e50; color: white;
+      border: none; padding: 13px 0; width: 100%;
+      font-size: 16px; border-radius: 8px; cursor: pointer;
     }
     .popup-add-btn:hover { background-color: #1a252f; }
-
-    /* ===== COMMENTS SECTION inside popup ===== */
-    .comments-section {
-      margin-top: 28px;
-      text-align: left;
-      border-top: 1px solid #eee;
-      padding-top: 20px;
-    }
-
-    .comments-section h4 {
-      font-size: 15px;
-      color: #2c3e50;
-      margin-bottom: 14px;
-      font-weight: bold;
-      letter-spacing: 0.3px;
-    }
-
-    /* --- Write a comment area --- */
-    .comment-input-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-
-    .comment-name-input {
-      padding: 9px 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #333;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .comment-name-input:focus { border-color: #2980b9; }
-
-    .comment-textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 13px;
-      resize: vertical;
-      min-height: 70px;
-      font-family: Arial, sans-serif;
-      color: #333;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .comment-textarea:focus { border-color: #2980b9; }
-
-    /* Star rating row */
-    .star-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 2px;
-    }
-    .star-row span { font-size: 12px; color: #888; }
-    .star-btn {
-      background: none; border: none; cursor: pointer;
-      font-size: 22px; padding: 0; line-height: 1;
-      transition: transform 0.1s;
-    }
-    .star-btn:hover { transform: scale(1.2); }
-
-    .submit-comment-btn {
-      background-color: #2980b9; color: white;
-      border: none; padding: 10px 0; width: 100%;
-      font-size: 14px; border-radius: 8px; cursor: pointer;
-      margin-top: 4px;
-      transition: background 0.2s;
-    }
-    .submit-comment-btn:hover { background-color: #1f6fa0; }
-
-    /* --- Comment list --- */
-    .comment-list { display: flex; flex-direction: column; gap: 12px; }
-
-    .comment-card {
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 13px;
-      text-align: left;
-      animation: slideIn 0.25s ease;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .comment-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-
-    .comment-author {
-      font-weight: bold;
-      color: #2c3e50;
-      font-size: 13px;
-    }
-
-    .comment-stars { font-size: 13px; letter-spacing: 1px; }
-
-    .comment-date { font-size: 11px; color: #aaa; margin-bottom: 5px; }
-
-    .comment-text { color: #444; line-height: 1.5; }
-
-    .no-comments-msg {
-      text-align: center;
-      color: #bbb;
-      font-size: 13px;
-      padding: 10px 0 4px;
-    }
 
     /* ===== CART SIDEBAR ===== */
     .cart-sidebar {
@@ -265,6 +189,23 @@
       background: #e74c3c; color: white; border: none;
       padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;
     }
+
+    /* ========================================
+       NEW: COMMENT DISPLAY STYLE IN CART
+       Shows the customer note under each item
+       ======================================== */
+    .cart-item-comment {
+      font-size: 12px;
+      color: #e67e22;                  /* orange color so comment stands out */
+      font-style: italic;
+      margin: -4px 0 8px 0;
+      padding: 4px 8px;
+      background: #fffbf2;            /* light yellow background */
+      border-left: 3px solid #f39c12; /* orange left border */
+      border-radius: 0 4px 4px 0;
+    }
+    /* ======================================== */
+
     .cart-total { margin-top: 20px; font-size: 18px; font-weight: bold; color: #2c3e50; }
     .checkout-btn {
       margin-top: 15px; background-color: #27ae60; color: white;
@@ -273,20 +214,24 @@
     }
     .checkout-btn:hover { background-color: #1e8449; }
     .empty-cart { color: #aaa; text-align: center; margin-top: 30px; font-size: 15px; }
+
+    /* ===== CART OVERLAY ===== */
     .cart-overlay {
       display: none; position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); z-index: 999;
     }
     .cart-overlay.active { display: block; }
 
-    /* ===== TOAST ===== */
+    /* ===== TOAST NOTIFICATION ===== */
     .toast {
       position: fixed; bottom: 30px; left: 30px;
       background: #2c3e50; color: white;
       padding: 12px 20px; border-radius: 8px;
       font-size: 14px; z-index: 2000;
       opacity: 0; transform: translateY(10px);
-      transition: opacity 0.3s, transform 0.3s; pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
@@ -297,7 +242,7 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
+  <!-- ===== NAVIGATION BAR ===== -->
   <nav class="navbar">
     <a class="logo" href="#">MyShop</a>
     <div class="cart-btn-wrap">
@@ -306,15 +251,16 @@
     </div>
   </nav>
 
-  <!-- HERO -->
+  <!-- ===== HERO BANNER ===== -->
   <div class="hero">
     <h1>Welcome to MyShop</h1>
     <p>Quality goods delivered to your door</p>
     <a class="shop-btn" href="#products">Shop Now</a>
   </div>
 
-  <!-- PRODUCTS -->
+  <!-- ===== PRODUCTS SECTION ===== -->
   <h2 class="section-title" id="products">Our Products</h2>
+
   <div class="product-grid">
 
     <div class="product-card" onclick="openPopup('📦','Premium Rice (5kg)',299,'In Stock: 50 units',false)">
@@ -367,7 +313,7 @@
 
   </div>
 
-  <!-- PRODUCT POPUP -->
+  <!-- ===== PRODUCT POPUP ===== -->
   <div class="popup-overlay" id="popupOverlay" onclick="closePopupOutside(event)">
     <div class="popup-box" id="popupBox">
 
@@ -378,114 +324,84 @@
       <p class="popup-price" id="popup-price">₹0</p>
       <p class="popup-stock" id="popup-stock">In Stock</p>
 
+      <!-- Quantity selector -->
       <div class="qty-selector">
         <button class="qty-btn" onclick="changeQty(-1)">−</button>
         <span class="qty-number" id="qty-number">1</span>
         <button class="qty-btn" onclick="changeQty(+1)">+</button>
       </div>
 
-      <p class="popup-subtotal">Subtotal: <span id="popup-subtotal">₹0</span></p>
+      <!-- Subtotal -->
+      <p class="popup-subtotal">
+        Subtotal: <span id="popup-subtotal">₹0</span>
+      </p>
 
-      <button class="popup-add-btn" onclick="addToCartFromPopup()">Add to Cart</button>
-
-      <!-- ===== MESSAGE TO SELLER ===== -->
-      <div style="margin-top:18px; text-align:left;">
-        <label style="font-size:13px; font-weight:bold; color:#2c3e50; display:block; margin-bottom:6px;">
-          📝 Message to Seller <span style="font-weight:normal; color:#aaa;">(optional)</span>
-        </label>
+      <!-- ========================================
+           NEW: COMMENT BOX
+           Customer can type a note here before
+           adding the item to their cart
+           ======================================== -->
+      <div class="comment-wrap">
+        <label for="customer-comment">📝 Add a note (optional)</label>
         <textarea
-          id="customer-message"
-          placeholder="Any special instructions, delivery notes, or requests..."
-          style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px;
-                 font-size:13px; font-family:Arial,sans-serif; resize:vertical;
-                 min-height:70px; outline:none; color:#333; transition: border-color 0.2s;"
-          onfocus="this.style.borderColor='#2980b9'"
-          onblur="this.style.borderColor='#ddd'"
-        ></textarea>
+          id="customer-comment"
+          rows="3"
+          placeholder="e.g. deliver before 6pm, handle with care, specific brand preferred...">
+        </textarea>
       </div>
+      <!-- ======================================== -->
 
-      <!-- ===== COMMENTS SECTION ===== -->
-      <div class="comments-section">
-        <h4>💬 Customer Reviews</h4>
-
-        <!-- Write comment form -->
-        <div class="comment-input-wrap">
-
-          <input
-            type="text"
-            class="comment-name-input"
-            id="comment-name"
-            placeholder="Your name (e.g. Rahul)"
-            maxlength="40"
-          />
-
-          <!-- Star rating -->
-          <div class="star-row">
-            <span>Rating:</span>
-            <button class="star-btn" onclick="setRating(1)" id="star-1">☆</button>
-            <button class="star-btn" onclick="setRating(2)" id="star-2">☆</button>
-            <button class="star-btn" onclick="setRating(3)" id="star-3">☆</button>
-            <button class="star-btn" onclick="setRating(4)" id="star-4">☆</button>
-            <button class="star-btn" onclick="setRating(5)" id="star-5">☆</button>
-          </div>
-
-          <textarea
-            class="comment-textarea"
-            id="comment-textarea"
-            placeholder="Share your experience with this product..."
-            maxlength="300"
-          ></textarea>
-
-          <button class="submit-comment-btn" onclick="submitComment()">Post Review</button>
-        </div>
-
-        <!-- List of posted comments -->
-        <div class="comment-list" id="comment-list">
-          <p class="no-comments-msg" id="no-comments-msg">No reviews yet. Be the first!</p>
-        </div>
-
-      </div>
-      <!-- end comments-section -->
+      <button class="popup-add-btn" onclick="addToCartFromPopup()">
+        Add to Cart
+      </button>
 
     </div>
   </div>
 
-  <!-- CART OVERLAY -->
+  <!-- ===== CART OVERLAY ===== -->
   <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 
-  <!-- CART SIDEBAR -->
+  <!-- ===== CART SIDEBAR ===== -->
   <div class="cart-sidebar" id="cartSidebar">
     <button class="close-cart" onclick="closeCart()">✕</button>
     <h2>🛒 Your Cart</h2>
-    <div id="cart-items"><p class="empty-cart">Your cart is empty</p></div>
-    <div class="cart-total" id="cart-total" style="display:none;">Total: ₹<span id="total-price">0</span></div>
-    <button class="checkout-btn" id="checkout-btn" style="display:none;" onclick="alert('Checkout coming soon!')">
+    <div id="cart-items">
+      <p class="empty-cart">Your cart is empty</p>
+    </div>
+    <div class="cart-total" id="cart-total" style="display:none;">
+      Total: ₹<span id="total-price">0</span>
+    </div>
+    <button class="checkout-btn" id="checkout-btn"
+            style="display:none;"
+            onclick="alert('Checkout coming soon!')">
       Proceed to Checkout
     </button>
   </div>
 
-  <!-- TOAST -->
+  <!-- ===== TOAST NOTIFICATION ===== -->
   <div class="toast" id="toast">✅ Added to cart!</div>
 
-  <!-- FOOTER -->
-  <footer><p>&copy; 2024 MyShop. All rights reserved.</p></footer>
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <p>&copy; 2024 MyShop. All rights reserved.</p>
+  </footer>
 
   <!-- ===== JAVASCRIPT ===== -->
   <script>
 
-    // --- Cart state ---
+    // Stores all cart items
     let cartItems = [];
+
+    // Currently open popup product
     let currentProduct = { name: '', price: 0 };
+
+    // Quantity selected in popup
     let currentQty = 1;
 
-    // --- Comments state ---
-    // allComments is an object: { productName: [ {author, rating, text, date}, ... ] }
-    let allComments = {};
-    let currentRating = 0;          // 0 means no star selected yet
 
-
-    // ---- Open popup ----
+    // ---- FUNCTION: Open product popup ----
     function openPopup(emoji, name, price, stockText, isLow) {
+
       document.getElementById('popup-emoji').textContent = emoji;
       document.getElementById('popup-name').textContent  = name;
       document.getElementById('popup-price').textContent = '₹' + price;
@@ -494,68 +410,109 @@
       stockEl.textContent = stockText;
       stockEl.className   = 'popup-stock' + (isLow ? ' low' : '');
 
+      // Reset quantity to 1
       currentQty = 1;
       document.getElementById('qty-number').textContent = 1;
+
+      // ========================================
+      // NEW: Clear comment box every time
+      // popup opens so old comment doesn't stay
+      // ========================================
+      document.getElementById('customer-comment').value = '';
+      // ========================================
+
       currentProduct = { name: name, price: price };
       updateSubtotal();
-
-      // Reset message field
-      document.getElementById('customer-message').value = '';
-
-      // Reset comment form
-      document.getElementById('comment-name').value     = '';
-      document.getElementById('comment-textarea').value = '';
-      currentRating = 0;
-      renderStars(0);
-
-      // Load comments for this product
-      renderComments(name);
 
       document.getElementById('popupOverlay').classList.add('active');
     }
 
 
-    // ---- Qty ----
+    // ---- FUNCTION: Change quantity ----
     function changeQty(change) {
       currentQty = Math.max(1, currentQty + change);
       document.getElementById('qty-number').textContent = currentQty;
       updateSubtotal();
     }
 
+
+    // ---- FUNCTION: Update subtotal in popup ----
     function updateSubtotal() {
-      document.getElementById('popup-subtotal').textContent = '₹' + (currentProduct.price * currentQty);
+      let subtotal = currentProduct.price * currentQty;
+      document.getElementById('popup-subtotal').textContent = '₹' + subtotal;
     }
 
 
-    // ---- Close popup ----
+    // ---- FUNCTION: Close popup ----
     function closePopup() {
       document.getElementById('popupOverlay').classList.remove('active');
     }
 
+
+    // ---- FUNCTION: Close popup when clicking outside ----
     function closePopupOutside(event) {
-      if (event.target === document.getElementById('popupOverlay')) closePopup();
+      if (event.target === document.getElementById('popupOverlay')) {
+        closePopup();
+      }
     }
 
 
-    // ---- Add to cart ----
+    // ---- FUNCTION: Add item to cart from popup ----
     function addToCartFromPopup() {
-      let { name, price } = currentProduct;
-      let qty = currentQty;
+
+      let name  = currentProduct.name;
+      let price = currentProduct.price;
+      let qty   = currentQty;
+
+      // ========================================
+      // NEW: Read the comment the customer typed
+      // .trim() removes extra spaces around text
+      // ========================================
+      let comment = document.getElementById('customer-comment').value.trim();
+      // ========================================
+
       let existing = cartItems.find(item => item.name === name);
-      let message = document.getElementById('customer-message').value.trim();
-      if (existing) { existing.quantity += qty; existing.message = message; }
-      else           { cartItems.push({ name, price, quantity: qty, message: message }); }
+
+      if (existing) {
+        existing.quantity += qty;
+        // ========================================
+        // NEW: Update comment if customer re-adds
+        // the same item with a new note
+        // ========================================
+        if (comment) { existing.comment = comment; }
+        // ========================================
+      } else {
+        // ========================================
+        // NEW: Save comment together with item
+        // ========================================
+        cartItems.push({ name: name, price: price, quantity: qty, comment: comment });
+        // ========================================
+      }
+
       updateCartDisplay();
+
+      // ========================================
+      // NEW: Clear comment box after adding
+      // so next product starts with empty box
+      // ========================================
+      document.getElementById('customer-comment').value = '';
+      // ========================================
+
       closePopup();
       showToast('✅ ' + qty + 'x ' + name + ' added!');
     }
 
+
+    // ---- FUNCTION: Remove item from cart ----
     function removeFromCart(index) {
       cartItems.splice(index, 1);
       updateCartDisplay();
     }
 
+
+    // ---- FUNCTION: Refresh cart display ----
     function updateCartDisplay() {
+
       let cartItemsDiv = document.getElementById('cart-items');
       let totalPriceEl = document.getElementById('total-price');
       let cartTotalDiv = document.getElementById('cart-total');
@@ -563,8 +520,13 @@
       let badge        = document.getElementById('cart-badge');
 
       let totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-      if (totalUnits > 0) { badge.textContent = totalUnits; badge.style.display = 'flex'; }
-      else                { badge.style.display = 'none'; }
+
+      if (totalUnits > 0) {
+        badge.textContent   = totalUnits;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
 
       if (cartItems.length === 0) {
         cartItemsDiv.innerHTML     = '<p class="empty-cart">Your cart is empty</p>';
@@ -573,34 +535,57 @@
         return;
       }
 
-      let html = '', total = 0;
+      let html  = '';
+      let total = 0;
+
       cartItems.forEach(function(item, index) {
         let itemTotal = item.price * item.quantity;
         total += itemTotal;
+
         html += `
           <div class="cart-item">
-            <span class="item-name">
-              ${item.name} x${item.quantity}
-              ${item.message ? `<br><span style="font-size:11px; color:#e67e22; font-style:italic;">📝 "${item.message}"</span>` : ''}
-            </span>
+            <span class="item-name">${item.name} x${item.quantity}</span>
             <span class="item-price">₹${itemTotal}</span>
             <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
-          </div>`;
+          </div>
+        `;
+
+        // ========================================
+        // NEW: Show comment under item in cart
+        // Only shows if customer typed something
+        // Empty comment = nothing shown
+        // ========================================
+        if (item.comment) {
+          html += `
+            <p class="cart-item-comment">📝 ${item.comment}</p>
+          `;
+        }
+        // ========================================
+
       });
 
       cartItemsDiv.innerHTML     = html;
       totalPriceEl.textContent   = total;
-      cartTotalDiv.style.display  = 'block';
-      checkoutBtn.style.display   = 'block';
+      cartTotalDiv.style.display = 'block';
+      checkoutBtn.style.display  = 'block';
     }
 
 
-    // ---- Cart sidebar ----
-    function openCart()  { document.getElementById('cartSidebar').classList.add('open');    document.getElementById('cartOverlay').classList.add('active'); }
-    function closeCart() { document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('active'); }
+    // ---- FUNCTION: Open cart sidebar ----
+    function openCart() {
+      document.getElementById('cartSidebar').classList.add('open');
+      document.getElementById('cartOverlay').classList.add('active');
+    }
 
 
-    // ---- Toast ----
+    // ---- FUNCTION: Close cart sidebar ----
+    function closeCart() {
+      document.getElementById('cartSidebar').classList.remove('open');
+      document.getElementById('cartOverlay').classList.remove('active');
+    }
+
+
+    // ---- FUNCTION: Show toast notification ----
     function showToast(message) {
       let toast = document.getElementById('toast');
       toast.textContent = message;
@@ -608,94 +593,7 @@
       setTimeout(() => { toast.classList.remove('show'); }, 2500);
     }
 
-
-    // ==============================
-    // ===== COMMENT FUNCTIONS ======
-    // ==============================
-
-    // Set star rating (1-5)
-    function setRating(n) {
-      currentRating = n;
-      renderStars(n);
-    }
-
-    // Fill/empty stars visually
-    function renderStars(n) {
-      for (let i = 1; i <= 5; i++) {
-        document.getElementById('star-' + i).textContent = (i <= n) ? '★' : '☆';
-      }
-    }
-
-    // Submit a new comment
-    function submitComment() {
-      let name    = document.getElementById('comment-name').value.trim();
-      let text    = document.getElementById('comment-textarea').value.trim();
-      let product = currentProduct.name;
-
-
-
-      // Build comment object
-      let comment = {
-        author : name,
-        rating : currentRating,   // 0 if no stars selected
-        text   : text,
-        date   : new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
-      };
-
-      // Save into allComments under this product name
-      if (!allComments[product]) allComments[product] = [];
-      allComments[product].unshift(comment);   // newest first
-
-      // Clear form
-      document.getElementById('comment-name').value     = '';
-      document.getElementById('comment-textarea').value = '';
-      currentRating = 0;
-      renderStars(0);
-
-      // Refresh list
-      renderComments(product);
-      showToast('💬 Review posted!');
-    }
-
-    // Render comments for a product into the popup list
-    function renderComments(productName) {
-      let list    = document.getElementById('comment-list');
-      let noMsg   = document.getElementById('no-comments-msg');
-      let comments = allComments[productName] || [];
-
-      if (comments.length === 0) {
-        list.innerHTML = '<p class="no-comments-msg" id="no-comments-msg">No reviews yet. Be the first!</p>';
-        return;
-      }
-
-      // Hide "no comments" msg
-      let html = '';
-      comments.forEach(function(c) {
-        let stars = c.rating > 0 ? '★'.repeat(c.rating) + '☆'.repeat(5 - c.rating) : '';
-        html += `
-          <div class="comment-card">
-            <div class="comment-header">
-              <span class="comment-author">👤 ${escapeHtml(c.author)}</span>
-              <span class="comment-stars">${stars}</span>
-            </div>
-            <div class="comment-date">${c.date}</div>
-            <div class="comment-text">${escapeHtml(c.text)}</div>
-          </div>`;
-      });
-
-      list.innerHTML = html;
-    }
-
-    // Prevent XSS — escape user-typed text before inserting into HTML
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#039;');
-    }
-
   </script>
+
 </body>
 </html>
