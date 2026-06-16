@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Shop - Distribution Store</title>
+  <title>Perfect Sales Entp. - Shop</title>
   <style>
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -103,8 +103,17 @@
       font-size: 22px; cursor: pointer; color: #888;
     }
     .popup-close:hover { color: #333; }
-    .popup-emoji { font-size: 70px; margin-bottom: 15px; }
-    .popup-box h2 { font-size: 22px; color: #2c3e50; margin-bottom: 6px; }
+
+    /* ===== WELCOME TEXT in popup instead of emoji ===== */
+    .popup-welcome {
+      font-size: 22px;
+      font-weight: bold;
+      color: #f39c12;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .popup-box h2 { font-size: 20px; color: #2c3e50; margin-bottom: 6px; }
     .popup-box .popup-stock { font-size: 14px; color: #888; margin-bottom: 20px; }
     .popup-box .popup-stock.low { color: #e74c3c; }
 
@@ -173,7 +182,6 @@
       background: #fffbf2; border-left: 3px solid #f39c12;
       border-radius: 0 4px 4px 0;
     }
-
     .checkout-btn {
       margin-top: 15px; background-color: #27ae60; color: white;
       border: none; padding: 12px; width: 100%;
@@ -214,10 +222,9 @@
     <div>
       <a class="logo" href="#">Perfect Sales Entp.</a>
       <!-- Shows customer shop name after login -->
-      <div id="customer-greeting" style="color:#f8c471; font-size:16px; margin-top:3px;"></div>
+      <div id="customer-greeting" style="color:#f8c471; font-size:13px; margin-top:3px;"></div>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
-      <!-- Logout button -->
       <button onclick="logout()"
         style="background:none; border:1px solid #aaa; color:#aaa;
                padding:5px 12px; border-radius:4px; cursor:pointer; font-size:13px;">
@@ -232,7 +239,7 @@
 
   <!-- ===== HERO BANNER ===== -->
   <div class="hero">
-    <h1>Welcome to MyShop</h1>
+    <h1>Welcome to Perfect Sales Entp.</h1>
     <p>Quality goods delivered to your door</p>
     <a class="shop-btn" href="#products">Shop Now</a>
   </div>
@@ -242,44 +249,42 @@
 
   <div class="product-grid">
 
-    <!-- Price and subtotal removed from all cards -->
-
-    <div class="product-card" onclick="openPopup('📦','Premium Rice (5kg)','In Stock: 50 units',false)">
+    <div class="product-card" onclick="openPopup('Premium Rice (5kg)','In Stock: 50 units',false)">
       <div class="img-placeholder">📦</div>
       <h3>Premium Rice (5kg)</h3>
       <p class="stock">In Stock: 50 units</p>
       <p class="tap-hint">Tap to add to cart</p>
     </div>
 
-    <div class="product-card" onclick="openPopup('🧴','Cooking Oil (1L)','In Stock: 30 units',false)">
+    <div class="product-card" onclick="openPopup('Cooking Oil (1L)','In Stock: 30 units',false)">
       <div class="img-placeholder">🧴</div>
       <h3>Cooking Oil (1L)</h3>
       <p class="stock">In Stock: 30 units</p>
       <p class="tap-hint">Tap to add to cart</p>
     </div>
 
-    <div class="product-card" onclick="openPopup('🧹','Broom Set','Low Stock: 5 units',true)">
+    <div class="product-card" onclick="openPopup('Broom Set','Low Stock: 5 units',true)">
       <div class="img-placeholder">🧹</div>
       <h3>Broom Set</h3>
       <p class="stock low">Low Stock: 5 units</p>
       <p class="tap-hint">Tap to add to cart</p>
     </div>
 
-    <div class="product-card" onclick="openPopup('🪣','Plastic Bucket','In Stock: 100 units',false)">
+    <div class="product-card" onclick="openPopup('Plastic Bucket','In Stock: 100 units',false)">
       <div class="img-placeholder">🪣</div>
       <h3>Plastic Bucket</h3>
       <p class="stock">In Stock: 100 units</p>
       <p class="tap-hint">Tap to add to cart</p>
     </div>
 
-    <div class="product-card" onclick="openPopup('🧼','Soap Bar (Pack of 4)','In Stock: 200 units',false)">
+    <div class="product-card" onclick="openPopup('Soap Bar (Pack of 4)','In Stock: 200 units',false)">
       <div class="img-placeholder">🧼</div>
       <h3>Soap Bar (Pack of 4)</h3>
       <p class="stock">In Stock: 200 units</p>
       <p class="tap-hint">Tap to add to cart</p>
     </div>
 
-    <div class="product-card" onclick="openPopup('🫙','Sugar (2kg)','Low Stock: 8 units',true)">
+    <div class="product-card" onclick="openPopup('Sugar (2kg)','Low Stock: 8 units',true)">
       <div class="img-placeholder">🫙</div>
       <h3>Sugar (2kg)</h3>
       <p class="stock low">Low Stock: 8 units</p>
@@ -294,9 +299,10 @@
 
       <button class="popup-close" onclick="closePopup()">✕</button>
 
-      <div class="popup-emoji" id="popup-emoji">📦</div>
+      <!-- Welcome text shown in gold instead of emoji -->
+      <div class="popup-welcome">Welcome</div>
+
       <h2 id="popup-name">Product Name</h2>
-      <!-- price and subtotal removed -->
       <p class="popup-stock" id="popup-stock">In Stock</p>
 
       <!-- Quantity selector -->
@@ -333,7 +339,6 @@
     <div id="cart-items">
       <p class="empty-cart">Your cart is empty</p>
     </div>
-    <!-- price and total removed -->
     <button class="checkout-btn" id="checkout-btn"
             style="display:none;"
             onclick="alert('Checkout coming soon!')">
@@ -346,7 +351,7 @@
 
   <!-- ===== FOOTER ===== -->
   <footer>
-    <p>&copy; 2024 MyShop. All rights reserved.</p>
+    <p>&copy; 2024 Perfect Sales Entp. All rights reserved.</p>
   </footer>
 
   <!-- ===== JAVASCRIPT ===== -->
@@ -363,12 +368,13 @@
 
 
     // ---- FUNCTION: Open product popup ----
-    // price parameter removed
-    function openPopup(emoji, name, stockText, isLow) {
+    // emoji parameter removed — "Welcome" text is fixed in HTML
+    function openPopup(name, stockText, isLow) {
 
-      document.getElementById('popup-emoji').textContent = welcome;
-      document.getElementById('popup-name').textContent  = name;
+      // Set product name in popup
+      document.getElementById('popup-name').textContent = name;
 
+      // Set stock text — red if low stock
       let stockEl = document.getElementById('popup-stock');
       stockEl.textContent = stockText;
       stockEl.className   = 'popup-stock' + (isLow ? ' low' : '');
@@ -380,14 +386,15 @@
       // Clear comment box
       document.getElementById('customer-comment').value = '';
 
-      // Save current product name only (no price)
+      // Save current product
       currentProduct = { name: name };
 
+      // Show popup
       document.getElementById('popupOverlay').classList.add('active');
     }
 
 
-    // ---- FUNCTION: Change quantity ----
+    // ---- FUNCTION: Change quantity with + or - ----
     function changeQty(change) {
       currentQty = Math.max(1, currentQty + change);
       document.getElementById('qty-number').textContent = currentQty;
@@ -400,7 +407,7 @@
     }
 
 
-    // ---- FUNCTION: Close popup when clicking outside ----
+    // ---- FUNCTION: Close popup when clicking outside box ----
     function closePopupOutside(event) {
       if (event.target === document.getElementById('popupOverlay')) {
         closePopup();
@@ -421,7 +428,6 @@
         existing.quantity += qty;
         if (comment) { existing.comment = comment; }
       } else {
-        // price removed from cart item
         cartItems.push({ name: name, quantity: qty, comment: comment });
       }
 
@@ -458,14 +464,14 @@
         badge.style.display = 'none';
       }
 
-      // If cart empty
+      // If cart empty show message
       if (cartItems.length === 0) {
         cartItemsDiv.innerHTML    = '<p class="empty-cart">Your cart is empty</p>';
         checkoutBtn.style.display = 'none';
         return;
       }
 
-      // Build cart item rows — no price shown
+      // Build cart item rows
       let html = '';
 
       cartItems.forEach(function(item, index) {
@@ -475,12 +481,9 @@
             <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
           </div>
         `;
-
         // Show comment if customer typed one
         if (item.comment) {
-          html += `
-            <p class="cart-item-comment">📝 ${item.comment}</p>
-          `;
+          html += `<p class="cart-item-comment">📝 ${item.comment}</p>`;
         }
       });
 
@@ -513,21 +516,20 @@
 
 
     // ---- FUNCTION: Check if customer is logged in ----
-    // Runs as soon as page loads
     function checkLogin() {
       let phone    = sessionStorage.getItem('customer_phone');
       let shopName = sessionStorage.getItem('customer_shop');
       let area     = sessionStorage.getItem('customer_area');
 
-      // If not logged in, send back to login page
+      // If not logged in redirect to login page
       if (!phone || !shopName || !area) {
         window.location.href = 'login.html';
         return;
       }
 
-      // Show greeting in navbar
+      // Show welcome greeting in navbar
       document.getElementById('customer-greeting').textContent =
-        'Welcome ' + shopName + ', ' + area;
+        'Welcome — ' + shopName + ', ' + area;
     }
 
 
