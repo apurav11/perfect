@@ -1,890 +1,613 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel — Perfect Sales Entp.</title>
+  <title>Perfect Sales Entp. - Shop</title>
   <style>
 
-    /* ===== RESET ===== */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; }
 
-    /* ===== ROOT TOKENS ===== */
-    :root {
-      --bg:        #f0f2f5;
-      --surface:   #ffffff;
-      --navy:      #2c3e50;
-      --gold:      #f39c12;
-      --gold-soft: #fef3dc;
-      --green:     #27ae60;
-      --red:       #e74c3c;
-      --red-soft:  #fdecea;
-      --border:    #e0e4ea;
-      --text:      #2c3e50;
-      --muted:     #7f8c8d;
-      --radius:    10px;
-      --shadow:    0 2px 12px rgba(0,0,0,0.08);
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    /* ========================================================
-       LOGIN SCREEN
-    ======================================================== */
-    #login-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
-      padding: 20px;
-    }
-
-    .login-wrap {
-      background: var(--surface);
-      border-radius: 16px;
-      padding: 40px 36px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
-      text-align: center;
-    }
-
-    .login-wrap .lock-icon {
-      font-size: 40px;
-      margin-bottom: 14px;
-    }
-
-    .login-wrap h2 {
-      font-size: 22px;
-      color: var(--navy);
-      margin-bottom: 4px;
-    }
-
-    .login-wrap .sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 28px;
-    }
-
-    .login-field {
-      margin-bottom: 16px;
-      text-align: left;
-    }
-
-    .login-field label {
-      display: block;
-      font-size: 12px;
-      font-weight: bold;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .login-field input {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 15px;
-      color: var(--text);
-      background: #fafafa;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .login-field input:focus { border-color: var(--gold); background: white; }
-
-    .login-btn {
-      width: 100%;
-      padding: 13px;
-      background: var(--navy);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: background 0.2s;
-    }
-
-    .login-btn:hover { background: #1a252f; }
-
-    .login-error {
-      display: none;
-      background: var(--red-soft);
-      color: var(--red);
-      border: 1px solid #f5c6cb;
-      border-radius: 6px;
-      padding: 9px 12px;
-      font-size: 13px;
-      margin-bottom: 14px;
-    }
-
-    .login-error.show { display: block; }
-
-    /* ========================================================
-       MAIN ADMIN LAYOUT
-    ======================================================== */
-    #admin-screen { display: none; }
-
-    /* ---- Top navbar ---- */
-    .admin-nav {
-      background: var(--navy);
-      padding: 14px 28px;
+    /* ===== NAVIGATION BAR ===== */
+    .navbar {
+      background-color: #2c3e50;
+      padding: 15px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .navbar .logo { color: white; font-size: 24px; font-weight: bold; text-decoration: none; }
+    .cart-btn-wrap { position: relative; display: inline-block; }
+    .navbar .cart-btn {
+      background-color: #e67e22; color: white;
+      border: none; padding: 10px 20px;
+      font-size: 16px; border-radius: 5px; cursor: pointer;
+    }
+    .navbar .cart-btn:hover { background-color: #d35400; }
+    .cart-badge {
+      position: absolute; top: -8px; right: -8px;
+      background: #e74c3c; color: white;
+      border-radius: 50%; width: 22px; height: 22px;
+      font-size: 12px; font-weight: bold;
+      display: none; align-items: center; justify-content: center;
     }
 
-    .admin-nav .brand {
-      color: var(--gold);
-      font-size: 20px;
-      font-weight: bold;
-      letter-spacing: 0.5px;
+    /* ===== HERO BANNER ===== */
+    .hero { background-color: #2980b9; color: white; text-align: center; padding: 50px 20px; }
+    .hero h1 { font-size: 36px; margin-bottom: 10px; }
+    .hero p { font-size: 18px; margin-bottom: 20px; }
+    .hero .shop-btn {
+      background-color: #e67e22; color: white;
+      padding: 12px 30px; font-size: 16px;
+      border: none; border-radius: 5px; cursor: pointer; text-decoration: none;
     }
 
-    .admin-nav .brand span {
-      color: #aab8c2;
-      font-size: 13px;
-      font-weight: normal;
-      margin-left: 10px;
-    }
+    /* ===== SECTION HEADING ===== */
+    .section-title { text-align: center; font-size: 28px; margin: 40px 0 20px; color: #2c3e50; }
 
-    .admin-nav .logout-btn {
-      background: none;
-      border: 1px solid #aaa;
-      color: #ccc;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .admin-nav .logout-btn:hover { border-color: var(--red); color: var(--red); }
-
-    /* ---- Page body ---- */
-    .admin-body {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 28px 20px 60px;
-    }
-
-    /* ---- Section cards ---- */
-    .card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-      overflow: hidden;
-    }
-
-    .card-header {
-      background: var(--navy);
-      color: white;
-      padding: 14px 20px;
-      font-size: 15px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-header .count-badge {
-      background: var(--gold);
-      color: var(--navy);
-      border-radius: 20px;
-      padding: 2px 10px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-left: auto;
-    }
-
-    .card-body { padding: 20px; }
-
-    /* ========================================================
-       ADD PRODUCT FORM
-    ======================================================== */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    @media (max-width: 580px) { .form-grid { grid-template-columns: 1fr; } }
-
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group.full { grid-column: 1 / -1; }
-
-    .form-group label {
-      font-size: 12px;
-      font-weight: bold;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-
-    .form-group input,
-    .form-group select {
-      padding: 11px 13px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 14px;
-      color: var(--text);
-      background: #fafafa;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus { border-color: var(--gold); background: white; }
-
-    /* Image upload area */
-    .img-upload-area {
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      background: #fafafa;
-    }
-
-    .img-upload-area:hover { border-color: var(--gold); background: var(--gold-soft); }
-
-    .img-upload-area input[type="file"] { display: none; }
-
-    .img-upload-area .upload-hint {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    .img-preview-wrap {
-      margin-top: 10px;
-      display: none;
-    }
-
-    .img-preview-wrap img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid var(--border);
-    }
-
-    .add-product-btn {
-      grid-column: 1 / -1;
-      padding: 13px;
-      background: var(--navy);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .add-product-btn:hover { background: #1a252f; }
-
-    .form-msg {
-      display: none;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      margin-top: 10px;
-      grid-column: 1 / -1;
-    }
-
-    .form-msg.success { display: block; background: #eafaf1; color: var(--green); border: 1px solid #a9dfbf; }
-    .form-msg.error   { display: block; background: var(--red-soft); color: var(--red); border: 1px solid #f5c6cb; }
-
-    /* ========================================================
-       PRODUCT TABLE
-    ======================================================== */
-    .product-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    .product-table th {
-      text-align: left;
-      padding: 10px 12px;
-      background: #f8f9fa;
-      border-bottom: 2px solid var(--border);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: var(--muted);
-    }
-
-    .product-table td {
-      padding: 12px 12px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-
-    .product-table tr:last-child td { border-bottom: none; }
-    .product-table tr:hover td { background: #fafbfc; }
-
-    /* Product thumbnail in table */
-    .prod-thumb {
-      width: 46px;
-      height: 46px;
-      object-fit: cover;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-
-    .prod-thumb-placeholder {
-      width: 46px;
-      height: 46px;
-      background: #dce3ea;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
+    /* ===== PRODUCT GRID ===== */
+    .product-grid {
+      display: flex; flex-wrap: wrap;
       justify-content: center;
+      gap: 20px; padding: 20px 30px 40px;
+    }
+
+    /* ===== PRODUCT CARD ===== */
+    .product-card {
+      background-color: white; border-radius: 8px;
+      width: 220px; padding: 15px; text-align: center;
+      border: 1px solid #ddd; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      border-color: #2980b9;
+    }
+    .product-card .img-placeholder {
+      width: 100%; height: 150px; background-color: #dce3ea;
+      border-radius: 5px; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 50px; margin-bottom: 10px;
+    }
+    .product-card h3 { font-size: 16px; margin: 10px 0 5px; color: #2c3e50; }
+    .product-card .stock { font-size: 13px; color: #888; margin-bottom: 8px; }
+    .product-card .stock.low { color: #e74c3c; }
+    .product-card .tap-hint { font-size: 12px; color: #aaa; }
+
+    /* ===== PRODUCT POPUP OVERLAY ===== */
+    .popup-overlay {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 500; align-items: center; justify-content: center;
+    }
+    .popup-overlay.active { display: flex; }
+    .popup-box {
+      background: white; border-radius: 12px;
+      padding: 30px; width: 380px; max-width: 90vw;
+      position: relative; text-align: center;
+      animation: popIn 0.2s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .popup-close {
+      position: absolute; top: 12px; right: 16px;
+      background: none; border: none;
+      font-size: 22px; cursor: pointer; color: #888;
+    }
+    .popup-close:hover { color: #333; }
+
+    /* ===== WELCOME TEXT in popup instead of emoji ===== */
+    .popup-welcome {
       font-size: 22px;
-    }
-
-    /* Stock badge */
-    .stock-badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 12px;
       font-weight: bold;
+      color: #f39c12;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
     }
 
-    .stock-badge.ok  { background: #eafaf1; color: var(--green); }
-    .stock-badge.low { background: var(--red-soft); color: var(--red); }
-    .stock-badge.out { background: #f4f4f4; color: #999; }
+    .popup-box h2 { font-size: 20px; color: #2c3e50; margin-bottom: 6px; }
+    .popup-box .popup-stock { font-size: 14px; color: #888; margin-bottom: 20px; }
+    .popup-box .popup-stock.low { color: #e74c3c; }
 
-    /* Stock adjust controls */
-    .stock-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    /* ===== QUANTITY SELECTOR ===== */
+    .qty-selector {
+      display: flex; align-items: center;
+      justify-content: center; gap: 16px; margin-bottom: 16px;
     }
-
-    .stock-controls input[type="number"] {
-      width: 60px;
-      padding: 6px 8px;
-      border: 1.5px solid var(--border);
-      border-radius: 6px;
-      font-size: 13px;
-      text-align: center;
-      outline: none;
+    .qty-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 2px solid #2c3e50; background: white;
+      font-size: 20px; cursor: pointer; color: #2c3e50;
+      display: flex; align-items: center; justify-content: center;
     }
+    .qty-btn:hover { background: #2c3e50; color: white; }
+    .qty-number { font-size: 24px; font-weight: bold; color: #2c3e50; min-width: 30px; text-align: center; }
 
-    .stock-controls input[type="number"]:focus { border-color: var(--gold); }
-
-    .sc-btn {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: opacity 0.15s;
+    /* ===== COMMENT BOX ===== */
+    .comment-wrap {
+      text-align: left; margin-bottom: 18px;
+      border: 2px dashed #f39c12;
+      border-radius: 8px; padding: 12px;
+      background-color: #fffbf2;
     }
-
-    .sc-btn:hover { opacity: 0.82; }
-    .sc-btn.add    { background: var(--green); color: white; }
-    .sc-btn.remove { background: var(--red);   color: white; }
-
-    /* Row action buttons */
-    .action-btns { display: flex; gap: 6px; align-items: center; }
-
-    .del-btn {
-      padding: 6px 10px;
-      background: var(--red-soft);
-      color: var(--red);
-      border: 1px solid #f5c6cb;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.15s;
+    .comment-wrap label {
+      font-size: 14px; color: #555;
+      display: block; margin-bottom: 6px; font-weight: bold;
     }
-
-    .del-btn:hover { background: var(--red); color: white; }
-
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--muted);
-      font-size: 15px;
+    .comment-wrap textarea {
+      width: 100%; padding: 10px; font-size: 14px;
+      border: 1px solid #ddd; border-radius: 6px;
+      resize: none; font-family: Arial; outline: none;
     }
+    .comment-wrap textarea:focus { border-color: #f39c12; }
 
-    /* ========================================================
-       TOAST
-    ======================================================== */
+    .popup-add-btn {
+      background-color: #2c3e50; color: white;
+      border: none; padding: 13px 0; width: 100%;
+      font-size: 16px; border-radius: 8px; cursor: pointer;
+    }
+    .popup-add-btn:hover { background-color: #1a252f; }
+
+    /* ===== CART SIDEBAR ===== */
+    .cart-sidebar {
+      position: fixed; top: 0; right: -350px;
+      width: 340px; height: 100%; background: white;
+      border-left: 2px solid #ddd; padding: 20px;
+      transition: right 0.3s ease; z-index: 1000; overflow-y: auto;
+    }
+    .cart-sidebar.open { right: 0; }
+    .cart-sidebar h2 { font-size: 22px; margin-bottom: 15px; color: #2c3e50; }
+    .close-cart { float: right; background: none; border: none; font-size: 22px; cursor: pointer; color: #888; }
+    .cart-item {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 10px 0;
+      border-bottom: 1px solid #eee; font-size: 14px;
+    }
+    .cart-item .item-name { flex: 1; color: #2c3e50; }
+    .cart-item .remove-btn {
+      background: #e74c3c; color: white; border: none;
+      padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    .cart-item-comment {
+      font-size: 12px; color: #e67e22; font-style: italic;
+      margin: -4px 0 8px 0; padding: 4px 8px;
+      background: #fffbf2; border-left: 3px solid #f39c12;
+      border-radius: 0 4px 4px 0;
+    }
+    .checkout-btn {
+      margin-top: 15px; background-color: #27ae60; color: white;
+      border: none; padding: 12px; width: 100%;
+      font-size: 16px; border-radius: 5px; cursor: pointer;
+    }
+    .checkout-btn:hover { background-color: #1e8449; }
+    .empty-cart { color: #aaa; text-align: center; margin-top: 30px; font-size: 15px; }
+
+    /* ===== CART OVERLAY ===== */
+    .cart-overlay {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); z-index: 999;
+    }
+    .cart-overlay.active { display: block; }
+
+    /* ===== TOAST NOTIFICATION ===== */
     .toast {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: var(--navy);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      z-index: 3000;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.25s, transform 0.25s;
+      position: fixed; bottom: 30px; left: 30px;
+      background: #2c3e50; color: white;
+      padding: 12px 20px; border-radius: 8px;
+      font-size: 14px; z-index: 2000;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
       pointer-events: none;
     }
-
     .toast.show { opacity: 1; transform: translateY(0); }
-    .toast.green { background: var(--green); }
-    .toast.red   { background: var(--red);   }
 
-    /* ========================================================
-       RESPONSIVE
-    ======================================================== */
-    @media (max-width: 680px) {
-      .product-table thead { display: none; }
-      .product-table, .product-table tbody, .product-table tr, .product-table td {
-        display: block; width: 100%;
-      }
-      .product-table tr { margin-bottom: 14px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-      .product-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
-      .product-table td::before {
-        content: attr(data-label) ": ";
-        font-weight: bold; font-size: 11px;
-        text-transform: uppercase; color: var(--muted);
-        display: block; margin-bottom: 4px;
-      }
-    }
+    /* ===== FOOTER ===== */
+    footer { background-color: #2c3e50; color: #ccc; text-align: center; padding: 20px; font-size: 14px; }
 
   </style>
 </head>
 <body>
 
-<!-- ============================================================
-     LOGIN SCREEN
-============================================================ -->
-<div id="login-screen">
-  <div class="login-wrap">
-    <div class="lock-icon">🔒</div>
-    <h2>Admin Login</h2>
-    <p class="sub">Perfect Sales Entp. — Owner Access Only</p>
-
-    <div class="login-error" id="login-error">⚠️ Wrong username or password</div>
-
-    <div class="login-field">
-      <label>Username</label>
-      <input type="text" id="admin-user" placeholder="Enter username" autocomplete="off"/>
+  <!-- ===== NAVIGATION BAR ===== -->
+  <nav class="navbar">
+    <div>
+      <a class="logo" href="#">Perfect Sales Entp.</a>
+      <!-- Shows customer shop name after login -->
+      <div id="customer-greeting" style="color:#f8c471; font-size:13px; margin-top:3px;"></div>
     </div>
-
-    <div class="login-field">
-      <label>Password</label>
-      <input type="password" id="admin-pass" placeholder="Enter password"/>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button onclick="logout()"
+        style="background:none; border:1px solid #aaa; color:#aaa;
+               padding:5px 12px; border-radius:4px; cursor:pointer; font-size:13px;">
+        Logout
+      </button>
+      <div class="cart-btn-wrap">
+        <button class="cart-btn" onclick="openCart()">🛒 Cart</button>
+        <div class="cart-badge" id="cart-badge">0</div>
+      </div>
     </div>
-
-    <button class="login-btn" onclick="adminLogin()">Login →</button>
-  </div>
-</div>
-
-<!-- ============================================================
-     ADMIN SCREEN
-============================================================ -->
-<div id="admin-screen">
-
-  <!-- Navbar -->
-  <nav class="admin-nav">
-    <div class="brand">
-      Perfect Sales Entp.
-      <span>Admin Panel</span>
-    </div>
-    <button class="logout-btn" onclick="adminLogout()">Logout</button>
   </nav>
 
-  <div class="admin-body">
-
-    <!-- ===== ADD PRODUCT CARD ===== -->
-    <div class="card">
-      <div class="card-header">➕ Add New Product</div>
-      <div class="card-body">
-        <div class="form-grid">
-
-          <div class="form-group">
-            <label>Product Name</label>
-            <input type="text" id="f-name" placeholder="e.g. Premium Rice (5kg)"/>
-          </div>
-
-          <div class="form-group">
-            <label>Category</label>
-            <select id="f-category">
-              <option value="">— Select Category —</option>
-              <option>Grocery</option>
-              <option>Cleaning</option>
-              <option>Household</option>
-              <option>Beverages</option>
-              <option>Personal Care</option>
-              <option>Stationery</option>
-              <option>Other</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Initial Stock (units)</label>
-            <input type="number" id="f-stock" placeholder="e.g. 50" min="0"/>
-          </div>
-
-          <div class="form-group">
-            <label>Low Stock Alert Below</label>
-            <input type="number" id="f-lowat" placeholder="e.g. 10" min="1"/>
-          </div>
-
-          <div class="form-group full">
-            <label>Product Image</label>
-            <label class="img-upload-area" id="upload-label" for="f-image">
-              <div style="font-size:30px;">📷</div>
-              <div class="upload-hint">Click to upload an image (JPG, PNG)</div>
-              <input type="file" id="f-image" accept="image/*" onchange="previewImage(event)"/>
-            </label>
-            <div class="img-preview-wrap" id="img-preview-wrap">
-              <img id="img-preview" src="" alt="Preview"/>
-              <p style="font-size:12px;color:var(--muted);margin-top:4px;">Image selected ✓</p>
-            </div>
-          </div>
-
-          <div class="form-msg" id="form-msg"></div>
-
-          <button class="add-product-btn" onclick="addProduct()">Add Product to Shop</button>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== INVENTORY TABLE CARD ===== -->
-    <div class="card">
-      <div class="card-header">
-        📦 Current Inventory
-        <span class="count-badge" id="prod-count">0 products</span>
-      </div>
-      <div class="card-body" style="padding:0;">
-        <div id="inventory-wrap">
-          <div class="empty-state">No products yet. Add one above ↑</div>
-        </div>
-      </div>
-    </div>
-
+  <!-- ===== HERO BANNER ===== -->
+  <div class="hero">
+    <h1>Welcome to Perfect Sales Entp.</h1>
+    <p>Quality goods delivered to your door</p>
+    <a class="shop-btn" href="#products">Shop Now</a>
   </div>
-</div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+  <!-- ===== PRODUCTS SECTION ===== -->
+  <h2 class="section-title" id="products">Our Products</h2>
 
-<!-- ============================================================
-     JAVASCRIPT
-============================================================ -->
-<script>
+  <!-- Product grid is rendered dynamically from localStorage by JS below -->
+  <div class="product-grid" id="product-grid"></div>
 
-  // ============================================================
-  // CONSTANTS — CHANGE THESE TO YOUR OWN CREDENTIALS
-  // ============================================================
-  const ADMIN_USERNAME = 'perfectsales';
-  const ADMIN_PASSWORD = 'bilaspur2024';
-  const STORAGE_KEY    = 'pse_products'; // shared key with index.html
+  <!-- ===== PRODUCT POPUP ===== -->
+  <div class="popup-overlay" id="popupOverlay" onclick="closePopupOutside(event)">
+    <div class="popup-box" id="popupBox">
 
-  // ============================================================
-  // LOGIN / LOGOUT
-  // ============================================================
+      <button class="popup-close" onclick="closePopup()">✕</button>
 
-  function adminLogin() {
-    let user = document.getElementById('admin-user').value.trim();
-    let pass = document.getElementById('admin-pass').value;
-    let errEl = document.getElementById('login-error');
+      <!-- Welcome text shown in gold instead of emoji -->
+      <div class="popup-welcome">Welcome</div>
 
-    if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
-      errEl.classList.remove('show');
-      sessionStorage.setItem('admin_auth', '1');
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('admin-screen').style.display = 'block';
-      renderInventory();
-    } else {
-      errEl.classList.add('show');
-    }
-  }
+      <h2 id="popup-name">Product Name</h2>
+      <p class="popup-stock" id="popup-stock">In Stock</p>
 
-  function adminLogout() {
-    sessionStorage.removeItem('admin_auth');
-    document.getElementById('admin-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('admin-user').value = '';
-    document.getElementById('admin-pass').value = '';
-  }
+      <!-- Quantity selector -->
+      <div class="qty-selector">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-number" id="qty-number">1</span>
+        <button class="qty-btn" onclick="changeQty(+1)">+</button>
+      </div>
 
-  // Auto-login if session active
-  if (sessionStorage.getItem('admin_auth') === '1') {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-screen').style.display = 'block';
-  }
+      <!-- Comment box -->
+      <div class="comment-wrap">
+        <label for="customer-comment">📝 Add a note (optional)</label>
+        <textarea
+          id="customer-comment"
+          rows="3"
+          placeholder="e.g. deliver before 6pm, handle with care...">
+        </textarea>
+      </div>
 
-  // Enter key on login
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') {
-      adminLogin();
-    }
-  });
+      <button class="popup-add-btn" onclick="addToCartFromPopup()">
+        Add to Cart
+      </button>
 
-  // ============================================================
-  // PRODUCT DATA — load/save from localStorage
-  // ============================================================
+    </div>
+  </div>
 
-  function loadProducts() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch(e) { return []; }
-  }
+  <!-- ===== CART OVERLAY ===== -->
+  <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 
-  function saveProducts(arr) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-  }
+  <!-- ===== CART SIDEBAR ===== -->
+  <div class="cart-sidebar" id="cartSidebar">
+    <button class="close-cart" onclick="closeCart()">✕</button>
+    <h2>🛒 Your Cart</h2>
+    <div id="cart-items">
+      <p class="empty-cart">Your cart is empty</p>
+    </div>
+    <button class="checkout-btn" id="checkout-btn"
+            style="display:none;"
+            onclick="placeOrder()">
+      Place Order ✓
+    </button>
+  </div>
 
-  // ============================================================
-  // IMAGE PREVIEW
-  // ============================================================
+  <!-- ===== TOAST NOTIFICATION ===== -->
+  <div class="toast" id="toast">✅ Added to cart!</div>
 
-  let imageBase64 = '';
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <p>&copy; 2024 Perfect Sales Entp. All rights reserved.</p>
+  </footer>
 
-  function previewImage(event) {
-    let file = event.target.files[0];
-    if (!file) return;
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
 
-    let reader = new FileReader();
-    reader.onload = function(e) {
-      imageBase64 = e.target.result;
-      document.getElementById('img-preview').src = imageBase64;
-      document.getElementById('img-preview-wrap').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  }
+    // Stores all cart items
+    let cartItems = [];
 
-  // ============================================================
-  // ADD PRODUCT
-  // ============================================================
+    // Currently open popup product
+    let currentProduct = { name: '' };
 
-  function addProduct() {
-    let name     = document.getElementById('f-name').value.trim();
-    let category = document.getElementById('f-category').value;
-    let stock    = parseInt(document.getElementById('f-stock').value);
-    let lowAt    = parseInt(document.getElementById('f-lowat').value) || 10;
-    let msgEl    = document.getElementById('form-msg');
+    // Quantity selected in popup
+    let currentQty = 1;
 
-    // Validation
-    if (!name) {
-      showFormMsg('error', '⚠️ Please enter a product name.');
-      return;
-    }
-    if (!category) {
-      showFormMsg('error', '⚠️ Please select a category.');
-      return;
-    }
-    if (isNaN(stock) || stock < 0) {
-      showFormMsg('error', '⚠️ Please enter a valid stock quantity.');
-      return;
+
+    // ---- FUNCTION: Open product popup ----
+    // emoji parameter removed — "Welcome" text is fixed in HTML
+    function openPopup(name, stockText, isLow) {
+
+      // Set product name in popup
+      document.getElementById('popup-name').textContent = name;
+
+      // Set stock text — red if low stock
+      let stockEl = document.getElementById('popup-stock');
+      stockEl.textContent = stockText;
+      stockEl.className   = 'popup-stock' + (isLow ? ' low' : '');
+
+      // Reset quantity to 1
+      currentQty = 1;
+      document.getElementById('qty-number').textContent = 1;
+
+      // Clear comment box
+      document.getElementById('customer-comment').value = '';
+
+      // Save current product
+      currentProduct = { name: name };
+
+      // Show popup
+      document.getElementById('popupOverlay').classList.add('active');
     }
 
-    let products = loadProducts();
 
-    // Check duplicate name
-    if (products.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-      showFormMsg('error', '⚠️ A product with this name already exists.');
-      return;
+    // ---- FUNCTION: Change quantity with + or - ----
+    function changeQty(change) {
+      currentQty = Math.max(1, currentQty + change);
+      document.getElementById('qty-number').textContent = currentQty;
     }
 
-    let newProduct = {
-      id:       Date.now(),
-      name:     name,
-      category: category,
-      stock:    stock,
-      lowAt:    lowAt,
-      image:    imageBase64 || ''
-    };
 
-    products.push(newProduct);
-    saveProducts(products);
-
-    // Reset form
-    document.getElementById('f-name').value     = '';
-    document.getElementById('f-category').value = '';
-    document.getElementById('f-stock').value    = '';
-    document.getElementById('f-lowat').value    = '';
-    document.getElementById('f-image').value    = '';
-    imageBase64 = '';
-    document.getElementById('img-preview-wrap').style.display = 'none';
-
-    showFormMsg('success', '✅ Product "' + name + '" added! Customers will see it after refreshing index.html.');
-    renderInventory();
-    showToast('✅ ' + name + ' added!', 'green');
-  }
-
-  // ============================================================
-  // ADJUST STOCK
-  // ============================================================
-
-  function adjustStock(id, type) {
-    let inputEl = document.getElementById('qty-' + id);
-    let qty     = parseInt(inputEl.value);
-
-    if (isNaN(qty) || qty <= 0) {
-      showToast('⚠️ Enter a valid quantity', 'red');
-      return;
+    // ---- FUNCTION: Close popup ----
+    function closePopup() {
+      document.getElementById('popupOverlay').classList.remove('active');
     }
 
-    let products = loadProducts();
-    let product  = products.find(p => p.id === id);
-    if (!product) return;
 
-    if (type === 'add') {
-      product.stock += qty;
-      showToast('✅ Added ' + qty + ' units to ' + product.name, 'green');
-    } else {
-      if (qty > product.stock) {
-        showToast('⚠️ Cannot remove more than current stock (' + product.stock + ')', 'red');
+    // ---- FUNCTION: Close popup when clicking outside box ----
+    function closePopupOutside(event) {
+      if (event.target === document.getElementById('popupOverlay')) {
+        closePopup();
+      }
+    }
+
+
+    // ---- FUNCTION: Add item to cart from popup ----
+    function addToCartFromPopup() {
+
+      let name    = currentProduct.name;
+      let qty     = currentQty;
+      let comment = document.getElementById('customer-comment').value.trim();
+
+      let existing = cartItems.find(item => item.name === name);
+
+      if (existing) {
+        existing.quantity += qty;
+        if (comment) { existing.comment = comment; }
+      } else {
+        cartItems.push({ name: name, quantity: qty, comment: comment });
+      }
+
+      updateCartDisplay();
+
+      document.getElementById('customer-comment').value = '';
+      closePopup();
+      showToast('✅ ' + qty + 'x ' + name + ' added!');
+    }
+
+
+    // ---- FUNCTION: Remove item from cart ----
+    function removeFromCart(index) {
+      cartItems.splice(index, 1);
+      updateCartDisplay();
+    }
+
+
+    // ---- FUNCTION: Refresh cart display ----
+    function updateCartDisplay() {
+
+      let cartItemsDiv = document.getElementById('cart-items');
+      let checkoutBtn  = document.getElementById('checkout-btn');
+      let badge        = document.getElementById('cart-badge');
+
+      // Count total units
+      let totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+      // Update badge
+      if (totalUnits > 0) {
+        badge.textContent   = totalUnits;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+
+      // If cart empty show message
+      if (cartItems.length === 0) {
+        cartItemsDiv.innerHTML    = '<p class="empty-cart">Your cart is empty</p>';
+        checkoutBtn.style.display = 'none';
         return;
       }
-      product.stock -= qty;
-      showToast('🔻 Removed ' + qty + ' units from ' + product.name, '');
+
+      // Build cart item rows
+      let html = '';
+
+      cartItems.forEach(function(item, index) {
+        html += `
+          <div class="cart-item">
+            <span class="item-name">${item.name} x${item.quantity}</span>
+            <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
+          </div>
+        `;
+        // Show comment if customer typed one
+        if (item.comment) {
+          html += `<p class="cart-item-comment">📝 ${item.comment}</p>`;
+        }
+      });
+
+      cartItemsDiv.innerHTML    = html;
+      checkoutBtn.style.display = 'block';
     }
 
-    inputEl.value = '';
-    saveProducts(products);
-    renderInventory();
-  }
 
-  // ============================================================
-  // DELETE PRODUCT
-  // ============================================================
+    // ---- FUNCTION: Place order — saves to localStorage for admin panel ----
+    function placeOrder() {
+      if (cartItems.length === 0) return;
 
-  function deleteProduct(id, name) {
-    if (!confirm('Delete "' + name + '"? This will remove it from the shop.')) return;
-    let products = loadProducts().filter(p => p.id !== id);
-    saveProducts(products);
-    renderInventory();
-    showToast('🗑️ ' + name + ' removed.', 'red');
-  }
+      let phone    = sessionStorage.getItem('customer_phone')  || '';
+      let shopName = sessionStorage.getItem('customer_shop')   || '';
+      let area     = sessionStorage.getItem('customer_area')   || '';
 
-  // ============================================================
-  // RENDER INVENTORY TABLE
-  // ============================================================
+      let order = {
+        id:        'ord_' + Date.now(),
+        phone:     phone,
+        shopName:  shopName,
+        area:      area,
+        items:     cartItems.map(function(i) {
+                     return { name: i.name, quantity: i.quantity, comment: i.comment || '' };
+                   }),
+        status:    'new',
+        timestamp: Date.now()
+      };
 
-  function renderInventory() {
-    let products = loadProducts();
-    let wrap     = document.getElementById('inventory-wrap');
-    let countEl  = document.getElementById('prod-count');
+      let orders = [];
+      try { orders = JSON.parse(localStorage.getItem('pse_orders')) || []; } catch(e) {}
+      orders.push(order);
+      localStorage.setItem('pse_orders', JSON.stringify(orders));
 
-    countEl.textContent = products.length + ' product' + (products.length !== 1 ? 's' : '');
-
-    if (products.length === 0) {
-      wrap.innerHTML = '<div class="empty-state">No products yet. Add one above ↑</div>';
-      return;
+      // Clear cart after placing
+      cartItems = [];
+      updateCartDisplay();
+      closeCart();
+      showToast('✅ Order placed! We will contact you soon.');
     }
 
-    let html = `
-      <table class="product-table">
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Product</th>
-            <th>Category</th>
-            <th>Stock</th>
-            <th>Adjust Stock</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
 
-    products.forEach(function(p) {
+    // ---- FUNCTION: Open cart sidebar ----
+    function openCart() {
+      document.getElementById('cartSidebar').classList.add('open');
+      document.getElementById('cartOverlay').classList.add('active');
+    }
 
-      // Stock badge
-      let badgeClass, badgeText;
-      if (p.stock === 0) {
-        badgeClass = 'out'; badgeText = 'Out of Stock';
-      } else if (p.stock <= p.lowAt) {
-        badgeClass = 'low'; badgeText = 'Low: ' + p.stock + ' units';
-      } else {
-        badgeClass = 'ok';  badgeText = 'In Stock: ' + p.stock + ' units';
+
+    // ---- FUNCTION: Close cart sidebar ----
+    function closeCart() {
+      document.getElementById('cartSidebar').classList.remove('open');
+      document.getElementById('cartOverlay').classList.remove('active');
+    }
+
+
+    // ---- FUNCTION: Show toast notification ----
+    function showToast(message) {
+      let toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2500);
+    }
+
+
+    // ---- FUNCTION: Check if customer is logged in ----
+    function checkLogin() {
+      let phone    = sessionStorage.getItem('customer_phone');
+      let shopName = sessionStorage.getItem('customer_shop');
+      let area     = sessionStorage.getItem('customer_area');
+
+      // If not logged in redirect to login page
+      if (!phone || !shopName || !area) {
+        window.location.href = 'login.html';
+        return;
       }
 
-      // Thumbnail
-      let thumbHtml = p.image
-        ? `<img class="prod-thumb" src="${p.image}" alt="${p.name}"/>`
-        : `<div class="prod-thumb-placeholder">📦</div>`;
+      // Show welcome greeting in navbar
+      document.getElementById('customer-greeting').textContent =
+        'Welcome — ' + shopName + ', ' + area;
+    }
 
-      html += `
-        <tr>
-          <td data-label="Image">${thumbHtml}</td>
-          <td data-label="Product"><strong>${p.name}</strong></td>
-          <td data-label="Category">${p.category}</td>
-          <td data-label="Stock"><span class="stock-badge ${badgeClass}">${badgeText}</span></td>
-          <td data-label="Adjust">
-            <div class="stock-controls">
-              <input type="number" id="qty-${p.id}" min="1" placeholder="Qty"/>
-              <button class="sc-btn add"    onclick="adjustStock(${p.id}, 'add')">+ Add</button>
-              <button class="sc-btn remove" onclick="adjustStock(${p.id}, 'remove')">− Remove</button>
-            </div>
-          </td>
-          <td data-label="Actions">
-            <div class="action-btns">
-              <button class="del-btn" onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g,"\\'")}')">🗑️ Delete</button>
-            </div>
-          </td>
-        </tr>
-      `;
-    });
 
-    html += '</tbody></table>';
-    wrap.innerHTML = html;
-  }
+    // ---- FUNCTION: Logout ----
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
 
-  // ============================================================
-  // UI HELPERS
-  // ============================================================
 
-  function showFormMsg(type, text) {
-    let el = document.getElementById('form-msg');
-    el.className = 'form-msg ' + type;
-    el.textContent = text;
-    setTimeout(() => { el.className = 'form-msg'; }, 5000);
-  }
+    // Run login check when page loads
+    checkLogin();
 
-  function showToast(msg, type) {
-    let t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast ' + (type || '');
-    t.classList.add('show');
-    setTimeout(() => { t.classList.remove('show'); }, 2800);
-  }
 
-  // ============================================================
-  // INIT
-  // ============================================================
+    // ============================================================
+    // LOAD PRODUCTS FROM LOCALSTORAGE (set by admin.html)
+    // ============================================================
 
-  if (sessionStorage.getItem('admin_auth') === '1') {
-    renderInventory();
-  }
+    const PSE_STORAGE_KEY = 'pse_products';
 
-</script>
+    function loadAndRenderProducts() {
+      let products = [];
+      try { products = JSON.parse(localStorage.getItem(PSE_STORAGE_KEY)) || []; }
+      catch(e) { products = []; }
+
+      let grid = document.getElementById('product-grid');
+
+      // Only show products the admin has set as visible
+      products = products.filter(function(p) { return p.visible !== false; });
+
+      if (products.length === 0) {
+        grid.innerHTML = `
+          <div style="text-align:center;padding:60px 20px;color:#aaa;width:100%;">
+            <div style="font-size:48px;margin-bottom:14px;">📭</div>
+            <p style="font-size:16px;">No products available right now.<br>Check back soon!</p>
+          </div>`;
+        return;
+      }
+
+      let html = '';
+
+      products.forEach(function(p) {
+
+        // Determine stock label and whether it's low
+        let isLow     = p.stock > 0 && p.stock <= (p.lowAt || 10);
+        let isOut     = p.stock === 0;
+        let stockText, stockClass;
+
+        if (isOut) {
+          stockText  = 'Out of Stock';
+          stockClass = 'stock low';
+        } else if (isLow) {
+          stockText  = 'Low Stock: ' + p.stock + ' units';
+          stockClass = 'stock low';
+        } else {
+          stockText  = 'In Stock: ' + p.stock + ' units';
+          stockClass = 'stock';
+        }
+
+        // Image or emoji placeholder
+        let imgHtml = p.image
+          ? `<img src="${p.image}" alt="${p.name}"
+               style="width:100%;height:150px;object-fit:cover;border-radius:5px;margin-bottom:10px;"/>`
+          : `<div class="img-placeholder">📦</div>`;
+
+        // Disable click if out of stock
+        let clickAttr = isOut
+          ? `onclick="showToast('⛔ ${p.name} is out of stock')"`
+          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut})"`;
+
+        html += `
+          <div class="product-card" ${clickAttr} style="${isOut ? 'opacity:0.55;cursor:not-allowed;' : ''}">
+            ${imgHtml}
+            <h3>${p.name}</h3>
+            <p class="tap-hint" style="font-size:11px;color:#aaa;margin-bottom:3px;">${p.category}</p>
+            <p class="${stockClass}">${stockText}</p>
+            <p class="tap-hint">${isOut ? 'Currently unavailable' : 'Tap to add to cart'}</p>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    // Render products on load
+    loadAndRenderProducts();
+
+  </script>
+
 </body>
 </html>
