@@ -298,8 +298,8 @@
     </div>
     <button class="checkout-btn" id="checkout-btn"
             style="display:none;"
-            onclick="alert('Checkout coming soon!')">
-      Proceed to Checkout
+            onclick="placeOrder()">
+      Place Order ✓
     </button>
   </div>
 
@@ -449,6 +449,39 @@
     }
 
 
+    // ---- FUNCTION: Place order — saves to localStorage for admin panel ----
+    function placeOrder() {
+      if (cartItems.length === 0) return;
+
+      let phone    = sessionStorage.getItem('customer_phone')  || '';
+      let shopName = sessionStorage.getItem('customer_shop')   || '';
+      let area     = sessionStorage.getItem('customer_area')   || '';
+
+      let order = {
+        id:        'ord_' + Date.now(),
+        phone:     phone,
+        shopName:  shopName,
+        area:      area,
+        items:     cartItems.map(function(i) {
+                     return { name: i.name, quantity: i.quantity, comment: i.comment || '' };
+                   }),
+        status:    'new',
+        timestamp: Date.now()
+      };
+
+      let orders = [];
+      try { orders = JSON.parse(localStorage.getItem('pse_orders')) || []; } catch(e) {}
+      orders.push(order);
+      localStorage.setItem('pse_orders', JSON.stringify(orders));
+
+      // Clear cart after placing
+      cartItems = [];
+      updateCartDisplay();
+      closeCart();
+      showToast('✅ Order placed! We will contact you soon.');
+    }
+
+
     // ---- FUNCTION: Open cart sidebar ----
     function openCart() {
       document.getElementById('cartSidebar').classList.add('open');
@@ -513,6 +546,9 @@
       catch(e) { products = []; }
 
       let grid = document.getElementById('product-grid');
+
+      // Only show products the admin has set as visible
+      products = products.filter(function(p) { return p.visible !== false; });
 
       if (products.length === 0) {
         grid.innerHTML = `
