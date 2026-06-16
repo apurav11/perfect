@@ -247,51 +247,8 @@
   <!-- ===== PRODUCTS SECTION ===== -->
   <h2 class="section-title" id="products">Our Products</h2>
 
-  <div class="product-grid">
-
-    <div class="product-card" onclick="openPopup('Premium Rice (5kg)','In Stock: 50 units',false)">
-      <div class="img-placeholder">📦</div>
-      <h3>Premium Rice (5kg)</h3>
-      <p class="stock">In Stock: 50 units</p>
-      <p class="tap-hint">Tap to add to cart</p>
-    </div>
-
-    <div class="product-card" onclick="openPopup('Cooking Oil (1L)','In Stock: 30 units',false)">
-      <div class="img-placeholder">🧴</div>
-      <h3>Cooking Oil (1L)</h3>
-      <p class="stock">In Stock: 30 units</p>
-      <p class="tap-hint">Tap to add to cart</p>
-    </div>
-
-    <div class="product-card" onclick="openPopup('Broom Set','Low Stock: 5 units',true)">
-      <div class="img-placeholder">🧹</div>
-      <h3>Broom Set</h3>
-      <p class="stock low">Low Stock: 5 units</p>
-      <p class="tap-hint">Tap to add to cart</p>
-    </div>
-
-    <div class="product-card" onclick="openPopup('Plastic Bucket','In Stock: 100 units',false)">
-      <div class="img-placeholder">🪣</div>
-      <h3>Plastic Bucket</h3>
-      <p class="stock">In Stock: 100 units</p>
-      <p class="tap-hint">Tap to add to cart</p>
-    </div>
-
-    <div class="product-card" onclick="openPopup('Soap Bar (Pack of 4)','In Stock: 200 units',false)">
-      <div class="img-placeholder">🧼</div>
-      <h3>Soap Bar (Pack of 4)</h3>
-      <p class="stock">In Stock: 200 units</p>
-      <p class="tap-hint">Tap to add to cart</p>
-    </div>
-
-    <div class="product-card" onclick="openPopup('Sugar (2kg)','Low Stock: 8 units',true)">
-      <div class="img-placeholder">🫙</div>
-      <h3>Sugar (2kg)</h3>
-      <p class="stock low">Low Stock: 8 units</p>
-      <p class="tap-hint">Tap to add to cart</p>
-    </div>
-
-  </div>
+  <!-- Product grid is rendered dynamically from localStorage by JS below -->
+  <div class="product-grid" id="product-grid"></div>
 
   <!-- ===== PRODUCT POPUP ===== -->
   <div class="popup-overlay" id="popupOverlay" onclick="closePopupOutside(event)">
@@ -542,6 +499,77 @@
 
     // Run login check when page loads
     checkLogin();
+
+
+    // ============================================================
+    // LOAD PRODUCTS FROM LOCALSTORAGE (set by admin.html)
+    // ============================================================
+
+    const PSE_STORAGE_KEY = 'pse_products';
+
+    function loadAndRenderProducts() {
+      let products = [];
+      try { products = JSON.parse(localStorage.getItem(PSE_STORAGE_KEY)) || []; }
+      catch(e) { products = []; }
+
+      let grid = document.getElementById('product-grid');
+
+      if (products.length === 0) {
+        grid.innerHTML = `
+          <div style="text-align:center;padding:60px 20px;color:#aaa;width:100%;">
+            <div style="font-size:48px;margin-bottom:14px;">📭</div>
+            <p style="font-size:16px;">No products available right now.<br>Check back soon!</p>
+          </div>`;
+        return;
+      }
+
+      let html = '';
+
+      products.forEach(function(p) {
+
+        // Determine stock label and whether it's low
+        let isLow     = p.stock > 0 && p.stock <= (p.lowAt || 10);
+        let isOut     = p.stock === 0;
+        let stockText, stockClass;
+
+        if (isOut) {
+          stockText  = 'Out of Stock';
+          stockClass = 'stock low';
+        } else if (isLow) {
+          stockText  = 'Low Stock: ' + p.stock + ' units';
+          stockClass = 'stock low';
+        } else {
+          stockText  = 'In Stock: ' + p.stock + ' units';
+          stockClass = 'stock';
+        }
+
+        // Image or emoji placeholder
+        let imgHtml = p.image
+          ? `<img src="${p.image}" alt="${p.name}"
+               style="width:100%;height:150px;object-fit:cover;border-radius:5px;margin-bottom:10px;"/>`
+          : `<div class="img-placeholder">📦</div>`;
+
+        // Disable click if out of stock
+        let clickAttr = isOut
+          ? `onclick="showToast('⛔ ${p.name} is out of stock')"`
+          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut})"`;
+
+        html += `
+          <div class="product-card" ${clickAttr} style="${isOut ? 'opacity:0.55;cursor:not-allowed;' : ''}">
+            ${imgHtml}
+            <h3>${p.name}</h3>
+            <p class="tap-hint" style="font-size:11px;color:#aaa;margin-bottom:3px;">${p.category}</p>
+            <p class="${stockClass}">${stockText}</p>
+            <p class="tap-hint">${isOut ? 'Currently unavailable' : 'Tap to add to cart'}</p>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    // Render products on load
+    loadAndRenderProducts();
 
   </script>
 
