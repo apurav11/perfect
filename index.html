@@ -129,7 +129,20 @@
       display: flex; align-items: center; justify-content: center;
     }
     .qty-btn:hover { background: #2c3e50; color: white; }
-    .qty-number { font-size: 24px; font-weight: bold; color: #2c3e50; min-width: 30px; text-align: center; }
+    .qty-number {
+      font-size: 22px; font-weight: bold; color: #2c3e50;
+      min-width: 64px; max-width: 80px; text-align: center;
+      border: 2px solid #ddd; border-radius: 8px;
+      padding: 6px 4px; outline: none;
+      font-family: Arial, sans-serif;
+      -moz-appearance: textfield;
+    }
+    .qty-number:focus { border-color: #f39c12; }
+    /* Hide default spinner arrows on number input for a cleaner look */
+    .qty-number::-webkit-outer-spin-button,
+    .qty-number::-webkit-inner-spin-button {
+      -webkit-appearance: none; margin: 0;
+    }
 
     /* ===== COMMENT BOX ===== */
     .comment-wrap {
@@ -262,10 +275,19 @@
       <h2 id="popup-name">Product Name</h2>
       <p class="popup-stock" id="popup-stock">In Stock</p>
 
-      <!-- Quantity selector -->
+      <!-- Quantity selector — type a number directly or use +/- -->
       <div class="qty-selector">
         <button class="qty-btn" onclick="changeQty(-1)">−</button>
-        <span class="qty-number" id="qty-number">1</span>
+        <input
+          type="number"
+          class="qty-number"
+          id="qty-number"
+          value="1"
+          min="1"
+          inputmode="numeric"
+          oninput="onQtyTyped()"
+          onblur="onQtyBlur()"
+        />
         <button class="qty-btn" onclick="changeQty(+1)">+</button>
       </div>
 
@@ -323,10 +345,13 @@
     // Quantity selected in popup
     let currentQty = 1;
 
+    // Max units available for the product currently open in the popup
+    let currentMaxStock = 9999;
+
 
     // ---- FUNCTION: Open product popup ----
     // emoji parameter removed — "Welcome" text is fixed in HTML
-    function openPopup(name, stockText, isLow) {
+    function openPopup(name, stockText, isLow, maxStock) {
 
       // Set product name in popup
       document.getElementById('popup-name').textContent = name;
@@ -336,9 +361,13 @@
       stockEl.textContent = stockText;
       stockEl.className   = 'popup-stock' + (isLow ? ' low' : '');
 
+      // Track max stock so the typed/clicked quantity never exceeds it
+      currentMaxStock = (typeof maxStock === 'number' && maxStock > 0) ? maxStock : 9999;
+
       // Reset quantity to 1
       currentQty = 1;
-      document.getElementById('qty-number').textContent = 1;
+      document.getElementById('qty-number').value = 1;
+      document.getElementById('qty-number').max   = currentMaxStock;
 
       // Clear comment box
       document.getElementById('customer-comment').value = '';
@@ -351,10 +380,46 @@
     }
 
 
-    // ---- FUNCTION: Change quantity with + or - ----
+    // ---- FUNCTION: Change quantity with + or - buttons ----
     function changeQty(change) {
-      currentQty = Math.max(1, currentQty + change);
-      document.getElementById('qty-number').textContent = currentQty;
+      currentQty = clampQty(currentQty + change);
+      document.getElementById('qty-number').value = currentQty;
+    }
+
+
+    // ---- FUNCTION: Keep quantity within 1...currentMaxStock ----
+    function clampQty(value) {
+      if (isNaN(value)) return 1;
+      value = Math.floor(value);
+      if (value < 1) value = 1;
+      if (value > currentMaxStock) value = currentMaxStock;
+      return value;
+    }
+
+
+    // ---- FUNCTION: Called as the user types in the quantity box ----
+    function onQtyTyped() {
+      let raw = document.getElementById('qty-number').value;
+      // Allow the field to be temporarily empty while typing
+      if (raw === '') { return; }
+      let num = parseInt(raw, 10);
+      if (!isNaN(num) && num > currentMaxStock) {
+        // Prevent typing more than available stock
+        document.getElementById('qty-number').value = currentMaxStock;
+        currentQty = currentMaxStock;
+        showToast('⚠️ Only ' + currentMaxStock + ' units available');
+      } else if (!isNaN(num)) {
+        currentQty = num;
+      }
+    }
+
+
+    // ---- FUNCTION: Clean up quantity box when user clicks away ----
+    function onQtyBlur() {
+      let raw = document.getElementById('qty-number').value;
+      let num = parseInt(raw, 10);
+      currentQty = clampQty(num);
+      document.getElementById('qty-number').value = currentQty;
     }
 
 
@@ -374,6 +439,9 @@
 
     // ---- FUNCTION: Add item to cart from popup ----
     function addToCartFromPopup() {
+
+      // Make sure whatever is currently typed is captured & validated
+      onQtyBlur();
 
       let name    = currentProduct.name;
       let qty     = currentQty;
@@ -588,7 +656,7 @@
         // Disable click if out of stock
         let clickAttr = isOut
           ? `onclick="showToast('⛔ ${p.name} is out of stock')"`
-          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut})"`;
+          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut}, ${p.stock})"`;
 
         html += `
           <div class="product-card" ${clickAttr} style="${isOut ? 'opacity:0.55;cursor:not-allowed;' : ''}">
