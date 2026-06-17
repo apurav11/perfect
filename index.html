@@ -518,9 +518,39 @@
     }
 
 
-    // ---- FUNCTION: Place order — saves to localStorage for admin panel ----
+    // ---- FUNCTION: Place order — saves order + deducts stock in localStorage ----
     function placeOrder() {
       if (cartItems.length === 0) return;
+
+      // Load current products so we can validate & deduct stock
+      let products = [];
+      try { products = JSON.parse(localStorage.getItem('pse_products')) || []; } catch(e) {}
+
+      // ---- Safety check: make sure nothing in the cart exceeds live stock ----
+      // (stock could have changed if admin updated it, or another customer ordered first)
+      for (let i = 0; i < cartItems.length; i++) {
+        let item    = cartItems[i];
+        let product = products.find(p => p.name === item.name);
+
+        if (!product) {
+          showToast('⚠️ "' + item.name + '" is no longer available. Please remove it from your cart.');
+          return;
+        }
+        if (item.quantity > product.stock) {
+          showToast('⚠️ Only ' + product.stock + ' units of "' + item.name + '" left. Please update your cart.');
+          return;
+        }
+      }
+
+      // ---- All good — deduct stock for each item ----
+      cartItems.forEach(function(item) {
+        let product = products.find(p => p.name === item.name);
+        if (product) {
+          product.stock -= item.quantity;
+          if (product.stock < 0) product.stock = 0;
+        }
+      });
+      localStorage.setItem('pse_products', JSON.stringify(products));
 
       let phone    = sessionStorage.getItem('customer_phone')  || '';
       let shopName = sessionStorage.getItem('customer_shop')   || '';
@@ -548,6 +578,9 @@
       updateCartDisplay();
       closeCart();
       showToast('✅ Order placed! We will contact you soon.');
+
+      // Re-render the product grid so updated stock shows immediately
+      loadAndRenderProducts();
     }
 
 
