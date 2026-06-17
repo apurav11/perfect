@@ -635,7 +635,7 @@
 
             <div class="form-group">
               <label>Category</label>
-              <select id="f-category">
+              <select id="f-category" onchange="updateStockLabel()">
                 <option value="">— Select Category —</option>
                 <option>Food</option>
                 <option>Cigarettes</option>
@@ -648,7 +648,7 @@
             </div>
 
             <div class="form-group">
-              <label>Initial Stock (units)</label>
+              <label id="f-stock-label">Initial Stock (units)</label>
               <input type="number" id="f-stock" placeholder="e.g. 50" min="0"/>
             </div>
 
@@ -739,6 +739,22 @@
   const ADMIN_PASSWORD  = 'apurav0085';
   const STORAGE_KEY     = 'pse_products';
   const ORDERS_KEY      = 'pse_orders';
+
+  /* ---- Unit label per category (e.g. Food -> lari, Juice -> carton) ---- */
+  function getUnitLabel(category) {
+    let map = {
+      'Food':  'lari',
+      'Juice': 'carton'
+    };
+    return map[category] || 'units';
+  }
+
+  /* ---- Update the "Initial Stock" label live as category changes ---- */
+  function updateStockLabel() {
+    let category = document.getElementById('f-category').value;
+    let label    = getUnitLabel(category);
+    document.getElementById('f-stock-label').textContent = 'Initial Stock (' + label + ')';
+  }
 
   /* =====================================================
      LOGIN
@@ -851,6 +867,7 @@
 
     document.getElementById('f-name').value     = '';
     document.getElementById('f-category').value = '';
+    updateStockLabel();
     document.getElementById('f-stock').value    = '';
     document.getElementById('f-lowat').value    = '';
     document.getElementById('f-image').value    = '';
@@ -888,15 +905,17 @@
     let product  = products.find(p => p.id === id);
     if (!product) return;
 
+    let unitLabel = getUnitLabel(product.category);
+
     if (type === 'add') {
       product.stock += qty;
-      showToast('✅ Added ' + qty + ' units to ' + product.name, 'green');
+      showToast('✅ Added ' + qty + ' ' + unitLabel + ' to ' + product.name, 'green');
     } else {
       if (qty > product.stock) {
-        showToast('⚠️ Cannot remove more than ' + product.stock + ' units', 'red'); return;
+        showToast('⚠️ Cannot remove more than ' + product.stock + ' ' + unitLabel, 'red'); return;
       }
       product.stock -= qty;
-      showToast('🔻 Removed ' + qty + ' from ' + product.name, '');
+      showToast('🔻 Removed ' + qty + ' ' + unitLabel + ' from ' + product.name, '');
     }
 
     inputEl.value = '';
@@ -939,10 +958,11 @@
     `;
 
     products.forEach(function(p) {
+      let unitLabel = getUnitLabel(p.category);
       let badgeClass, badgeText;
       if (p.stock === 0)           { badgeClass = 'out'; badgeText = 'Out of Stock'; }
-      else if (p.stock <= p.lowAt) { badgeClass = 'low'; badgeText = 'Low: ' + p.stock + ' units'; }
-      else                         { badgeClass = 'ok';  badgeText = 'In Stock: ' + p.stock; }
+      else if (p.stock <= p.lowAt) { badgeClass = 'low'; badgeText = 'Low: ' + p.stock + ' ' + unitLabel; }
+      else                         { badgeClass = 'ok';  badgeText = 'In Stock: ' + p.stock + ' ' + unitLabel; }
 
       let thumbHtml = p.image
         ? `<img class="prod-thumb" src="${p.image}" alt="${p.name}"/>`
@@ -968,7 +988,7 @@
           </td>
           <td data-label="Adjust Stock">
             <div class="stock-controls">
-              <input type="number" id="qty-${p.id}" min="1" placeholder="Qty"/>
+              <input type="number" id="qty-${p.id}" min="1" placeholder="${unitLabel}"/>
               <button class="sc-btn add"    onclick="adjustStock(${p.id}, 'add')">+ Add</button>
               <button class="sc-btn remove" onclick="adjustStock(${p.id}, 'remove')">− Remove</button>
             </div>
@@ -1060,7 +1080,7 @@
       let itemsHtml = order.items.map(item => `
         <tr>
           <td>${item.name}</td>
-          <td style="text-align:center;">${item.quantity}</td>
+          <td style="text-align:center;">${item.quantity} ${item.unit || 'units'}</td>
           <td>${item.comment ? `<span class="order-note">📝 ${item.comment}</span>` : '<span style="color:#ccc">—</span>'}</td>
         </tr>
       `).join('');

@@ -349,10 +349,13 @@
     // Max units available for the product currently open in the popup
     let currentMaxStock = 9999;
 
+    // Unit label (e.g. "lari", "carton", "units") for the product currently open in the popup
+    let currentUnitLabel = 'units';
+
 
     // ---- FUNCTION: Open product popup ----
     // emoji parameter removed — "Welcome" text is fixed in HTML
-    function openPopup(name, stockText, isLow, maxStock) {
+    function openPopup(name, stockText, isLow, maxStock, unitLabel) {
 
       // Set product name in popup
       document.getElementById('popup-name').textContent = name;
@@ -363,7 +366,8 @@
       stockEl.className   = 'popup-stock' + (isLow ? ' low' : '');
 
       // Track max stock so the typed/clicked quantity never exceeds it
-      currentMaxStock = (typeof maxStock === 'number' && maxStock > 0) ? maxStock : 9999;
+      currentMaxStock  = (typeof maxStock === 'number' && maxStock > 0) ? maxStock : 9999;
+      currentUnitLabel = unitLabel || 'units';
 
       // Reset quantity to 1
       currentQty = 1;
@@ -408,7 +412,7 @@
         // Prevent typing more than available stock
         document.getElementById('qty-number').value = currentMaxStock;
         currentQty = currentMaxStock;
-        showToast('⚠️ Only ' + currentMaxStock + ' units available');
+        showToast('⚠️ Only ' + currentMaxStock + ' ' + currentUnitLabel + ' available');
       } else if (!isNaN(num)) {
         currentQty = num;
       }
@@ -454,7 +458,7 @@
         existing.quantity += qty;
         if (comment) { existing.comment = comment; }
       } else {
-        cartItems.push({ name: name, quantity: qty, comment: comment });
+        cartItems.push({ name: name, quantity: qty, comment: comment, unit: currentUnitLabel });
       }
 
       updateCartDisplay();
@@ -503,7 +507,7 @@
       cartItems.forEach(function(item, index) {
         html += `
           <div class="cart-item">
-            <span class="item-name">${item.name} x${item.quantity}</span>
+            <span class="item-name">${item.name} x${item.quantity} ${item.unit || 'units'}</span>
             <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
           </div>
         `;
@@ -537,7 +541,7 @@
           return;
         }
         if (item.quantity > product.stock) {
-          showToast('⚠️ Only ' + product.stock + ' units of "' + item.name + '" left. Please update your cart.');
+          showToast('⚠️ Only ' + product.stock + ' ' + getUnitLabel(product.category) + ' of "' + item.name + '" left. Please update your cart.');
           return;
         }
       }
@@ -562,7 +566,7 @@
         shopName:  shopName,
         area:      area,
         items:     cartItems.map(function(i) {
-                     return { name: i.name, quantity: i.quantity, comment: i.comment || '' };
+                     return { name: i.name, quantity: i.quantity, comment: i.comment || '', unit: i.unit || 'units' };
                    }),
         status:    'new',
         timestamp: Date.now()
@@ -642,6 +646,15 @@
 
     const PSE_STORAGE_KEY = 'pse_products';
 
+    // ---- FUNCTION: Get the unit label for a category (e.g. "lari" for Food, "carton" for Juice) ----
+    function getUnitLabel(category) {
+      let map = {
+        'Food':  'lari',
+        'Juice': 'carton'
+      };
+      return map[category] || 'units';
+    }
+
     function loadAndRenderProducts() {
       let products = [];
       try { products = JSON.parse(localStorage.getItem(PSE_STORAGE_KEY)) || []; }
@@ -668,16 +681,17 @@
         // Determine stock label and whether it's low
         let isLow     = p.stock > 0 && p.stock <= (p.lowAt || 10);
         let isOut     = p.stock === 0;
+        let unitLabel = getUnitLabel(p.category);
         let stockText, stockClass;
 
         if (isOut) {
           stockText  = 'Out of Stock';
           stockClass = 'stock low';
         } else if (isLow) {
-          stockText  = 'Low Stock: ' + p.stock + ' units';
+          stockText  = 'Low Stock: ' + p.stock + ' ' + unitLabel;
           stockClass = 'stock low';
         } else {
-          stockText  = 'In Stock: ' + p.stock + ' units';
+          stockText  = 'In Stock: ' + p.stock + ' ' + unitLabel;
           stockClass = 'stock';
         }
 
@@ -690,7 +704,7 @@
         // Disable click if out of stock
         let clickAttr = isOut
           ? `onclick="showToast('⛔ ${p.name} is out of stock')"`
-          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut}, ${p.stock})"`;
+          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut}, ${p.stock}, '${unitLabel}')"`;
 
         html += `
           <div class="product-card" ${clickAttr} style="${isOut ? 'opacity:0.55;cursor:not-allowed;' : ''}">
