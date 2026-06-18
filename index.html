@@ -541,7 +541,7 @@
           return;
         }
         if (item.quantity > product.stock) {
-          showToast('⚠️ Only ' + product.stock + ' ' + getUnitLabel(product.category) + ' of "' + item.name + '" left. Please update your cart.');
+          showToast('⚠️ Only ' + product.stock + ' ' + getUnitLabel(product) + ' of "' + item.name + '" left. Please update your cart.');
           return;
         }
       }
@@ -646,13 +646,15 @@
 
     const PSE_STORAGE_KEY = 'pse_products';
 
-    // ---- FUNCTION: Get the unit label for a category (e.g. "lari" for Food, "carton" for Juice) ----
-    function getUnitLabel(category) {
+    // ---- FUNCTION: Get the unit label for a product (e.g. "lari", "carton", "box" — set by admin per product) ----
+    function getUnitLabel(product) {
+      if (product && product.unit) return product.unit;
+      // fallback for old products saved before per-product units existed
       let map = {
         'Food':  'lari',
         'Juice': 'carton'
       };
-      return map[category] || 'units';
+      return (product && map[product.category]) || 'units';
     }
 
     function loadAndRenderProducts() {
@@ -681,7 +683,7 @@
         // Determine stock label and whether it's low
         let isLow     = p.stock > 0 && p.stock <= (p.lowAt || 10);
         let isOut     = p.stock === 0;
-        let unitLabel = getUnitLabel(p.category);
+        let unitLabel = getUnitLabel(p);
         let stockText, stockClass;
 
         if (isOut) {

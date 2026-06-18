@@ -635,7 +635,7 @@
 
             <div class="form-group">
               <label>Category</label>
-              <select id="f-category" onchange="updateStockLabel()">
+              <select id="f-category">
                 <option value="">— Select Category —</option>
                 <option>Food</option>
                 <option>Cigarettes</option>
@@ -648,8 +648,13 @@
             </div>
 
             <div class="form-group">
-              <label id="f-stock-label">Initial Stock (units)</label>
-              <input type="number" id="f-stock" placeholder="e.g. 50" min="0"/>
+              <label id="f-stock-label">Initial Stock (quantity)</label>
+              <input type="number" id="f-stock" placeholder="e.g. 20" min="0"/>
+            </div>
+
+            <div class="form-group">
+              <label>Stock Unit</label>
+              <input type="text" id="f-unit" placeholder="e.g. lari, carton, box, packet"/>
             </div>
 
             <div class="form-group">
@@ -740,20 +745,15 @@
   const STORAGE_KEY     = 'pse_products';
   const ORDERS_KEY      = 'pse_orders';
 
-  /* ---- Unit label per category (e.g. Food -> lari, Juice -> carton) ---- */
-  function getUnitLabel(category) {
+  /* ---- Unit label is now stored PER PRODUCT (e.g. "lari", "carton", "box") ----
+     Falls back to the old category map only for products saved before this change. */
+  function getUnitLabel(product) {
+    if (product && product.unit) return product.unit;
     let map = {
       'Food':  'lari',
       'Juice': 'carton'
     };
-    return map[category] || 'units';
-  }
-
-  /* ---- Update the "Initial Stock" label live as category changes ---- */
-  function updateStockLabel() {
-    let category = document.getElementById('f-category').value;
-    let label    = getUnitLabel(category);
-    document.getElementById('f-stock-label').textContent = 'Initial Stock (' + label + ')';
+    return (product && map[product.category]) || 'units';
   }
 
   /* =====================================================
@@ -842,11 +842,13 @@
     let name     = document.getElementById('f-name').value.trim();
     let category = document.getElementById('f-category').value;
     let stock    = parseInt(document.getElementById('f-stock').value);
+    let unit     = document.getElementById('f-unit').value.trim();
     let lowAt    = parseInt(document.getElementById('f-lowat').value) || 10;
 
     if (!name)     { showFormMsg('error', '⚠️ Please enter a product name.'); return; }
     if (!category) { showFormMsg('error', '⚠️ Please select a category.'); return; }
     if (isNaN(stock) || stock < 0) { showFormMsg('error', '⚠️ Please enter a valid stock quantity.'); return; }
+    if (!unit)     { showFormMsg('error', '⚠️ Please enter a stock unit (e.g. lari, carton, box).'); return; }
 
     let products = loadProducts();
     if (products.find(p => p.name.toLowerCase() === name.toLowerCase())) {
@@ -858,6 +860,7 @@
       name:    name,
       category:category,
       stock:   stock,
+      unit:    unit,          // <-- new: free-text unit, e.g. "lari", "carton", "box"
       lowAt:   lowAt,
       image:   imageBase64 || '',
       visible: true          // <-- new: visible by default
@@ -867,8 +870,8 @@
 
     document.getElementById('f-name').value     = '';
     document.getElementById('f-category').value = '';
-    updateStockLabel();
     document.getElementById('f-stock').value    = '';
+    document.getElementById('f-unit').value     = '';
     document.getElementById('f-lowat').value    = '';
     document.getElementById('f-image').value    = '';
     imageBase64 = '';
@@ -905,7 +908,7 @@
     let product  = products.find(p => p.id === id);
     if (!product) return;
 
-    let unitLabel = getUnitLabel(product.category);
+    let unitLabel = getUnitLabel(product);
 
     if (type === 'add') {
       product.stock += qty;
@@ -921,6 +924,26 @@
     inputEl.value = '';
     saveProducts(products);
     renderInventory();
+  }
+
+  /* =====================================================
+     EDIT UNIT NAME (e.g. change "carton" to "box" anytime)
+  ===================================================== */
+  function editUnit(id) {
+    let products = loadProducts();
+    let product  = products.find(p => p.id === id);
+    if (!product) return;
+
+    let current  = getUnitLabel(product);
+    let newUnit  = prompt('Stock unit for "' + product.name + '" (e.g. lari, carton, box, packet):', current);
+    if (newUnit === null) return; // cancelled
+    newUnit = newUnit.trim();
+    if (!newUnit) { showToast('⚠️ Unit cannot be empty', 'red'); return; }
+
+    product.unit = newUnit;
+    saveProducts(products);
+    renderInventory();
+    showToast('✅ Unit updated to "' + newUnit + '" for ' + product.name, 'green');
   }
 
   /* =====================================================
@@ -958,7 +981,7 @@
     `;
 
     products.forEach(function(p) {
-      let unitLabel = getUnitLabel(p.category);
+      let unitLabel = getUnitLabel(p);
       let badgeClass, badgeText;
       if (p.stock === 0)           { badgeClass = 'out'; badgeText = 'Out of Stock'; }
       else if (p.stock <= p.lowAt) { badgeClass = 'low'; badgeText = 'Low: ' + p.stock + ' ' + unitLabel; }
@@ -975,7 +998,11 @@
           <td data-label="Image">${thumbHtml}</td>
           <td data-label="Product"><strong>${p.name}</strong></td>
           <td data-label="Category">${p.category}</td>
-          <td data-label="Stock"><span class="stock-badge ${badgeClass}">${badgeText}</span></td>
+          <td data-label="Stock">
+            <span class="stock-badge ${badgeClass}">${badgeText}</span>
+            <button class="sc-btn" style="padding:3px 8px;font-size:11px;margin-left:6px;"
+              onclick="editUnit(${p.id})" title="Change unit name">✏️ unit</button>
+          </td>
           <td data-label="Visible">
             <div class="vis-toggle">
               <label class="toggle-switch">
