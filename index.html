@@ -75,7 +75,7 @@
       font-size: 50px; margin-bottom: 10px;
     }
     .product-card h3 { font-size: 16px; margin: 10px 0 5px; color: #2c3e50; }
-    .product-card .stock { font-size: 13px; color: #0b2a11; margin-bottom: 8px; }
+    .product-card .stock { font-size: 13px; color: #888; margin-bottom: 8px; }
     .product-card .stock.low { color: #e74c3c; }
     .product-card .tap-hint { font-size: 12px; color: #aaa; }
 
@@ -339,6 +339,7 @@
 
     // Stores all cart items
     let cartItems = [];
+    window._cartItems = cartItems; // expose for Firebase module
 
     // Currently open popup product
     let currentProduct = { name: '' };
@@ -522,69 +523,14 @@
     }
 
 
-    // ---- FUNCTION: Place order — saves order + deducts stock in localStorage ----
+    // ---- FUNCTION: Place order — saves to Firebase ----
     function placeOrder() {
-      if (cartItems.length === 0) return;
-
-      // Load current products so we can validate & deduct stock
-      let products = [];
-      try { products = JSON.parse(localStorage.getItem('pse_products')) || []; } catch(e) {}
-
-      // ---- Safety check: make sure nothing in the cart exceeds live stock ----
-      // (stock could have changed if admin updated it, or another customer ordered first)
-      for (let i = 0; i < cartItems.length; i++) {
-        let item    = cartItems[i];
-        let product = products.find(p => p.name === item.name);
-
-        if (!product) {
-          showToast('⚠️ "' + item.name + '" is no longer available. Please remove it from your cart.');
-          return;
-        }
-        if (item.quantity > product.stock) {
-          showToast('⚠️ Only ' + product.stock + ' ' + getUnitLabel(product) + ' of "' + item.name + '" left. Please update your cart.');
-          return;
-        }
+      window._cartItems = cartItems;
+      if (typeof window.placeOrderFirebase === 'function') {
+        window.placeOrderFirebase();
+      } else {
+        showToast('⚠️ Still connecting... please try again in a moment.');
       }
-
-      // ---- All good — deduct stock for each item ----
-      cartItems.forEach(function(item) {
-        let product = products.find(p => p.name === item.name);
-        if (product) {
-          product.stock -= item.quantity;
-          if (product.stock < 0) product.stock = 0;
-        }
-      });
-      localStorage.setItem('pse_products', JSON.stringify(products));
-
-      let phone    = sessionStorage.getItem('customer_phone')  || '';
-      let shopName = sessionStorage.getItem('customer_shop')   || '';
-      let area     = sessionStorage.getItem('customer_area')   || '';
-
-      let order = {
-        id:        'ord_' + Date.now(),
-        phone:     phone,
-        shopName:  shopName,
-        area:      area,
-        items:     cartItems.map(function(i) {
-                     return { name: i.name, quantity: i.quantity, comment: i.comment || '', unit: i.unit || 'units' };
-                   }),
-        status:    'new',
-        timestamp: Date.now()
-      };
-
-      let orders = [];
-      try { orders = JSON.parse(localStorage.getItem('pse_orders')) || []; } catch(e) {}
-      orders.push(order);
-      localStorage.setItem('pse_orders', JSON.stringify(orders));
-
-      // Clear cart after placing
-      cartItems = [];
-      updateCartDisplay();
-      closeCart();
-      showToast('✅ Order placed! We will contact you soon.');
-
-      // Re-render the product grid so updated stock shows immediately
-      loadAndRenderProducts();
     }
 
 
@@ -639,33 +585,42 @@
     // Run login check when page loads
     checkLogin();
 
+  </script>
+
+  <!-- ===== FIREBASE SDK ===== -->
+  <script type="module">
+    import { initializeApp }                        from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getFirestore, collection, getDocs,
+             addDoc, doc, updateDoc, onSnapshot,
+             query, orderBy }                       from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+    // ---- Firebase config ----
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBJYY2RhpJUmoyPRpOgGTaRN1_iHDS861Y",
+      authDomain:        "perfect-sales-c5315.firebaseapp.com",
+      projectId:         "perfect-sales-c5315",
+      storageBucket:     "perfect-sales-c5315.firebasestorage.app",
+      messagingSenderId: "910912966286",
+      appId:             "1:910912966286:web:0d366f71e17347ec4bc3df",
+      measurementId:     "G-8ZKJ80YEKZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
 
     // ============================================================
-    // LOAD PRODUCTS FROM LOCALSTORAGE (set by admin.html)
+    // LOAD PRODUCTS FROM FIREBASE
     // ============================================================
 
-    const PSE_STORAGE_KEY = 'pse_products';
-
-    // ---- FUNCTION: Get the unit label for a product (e.g. "lari", "carton", "box" — set by admin per product) ----
     function getUnitLabel(product) {
       if (product && product.unit) return product.unit;
-      // fallback for old products saved before per-product units existed
-      let map = {
-        'Food':  'lari',
-        'Juice': 'carton'
-      };
+      let map = { 'Food': 'lari', 'Juice': 'carton' };
       return (product && map[product.category]) || 'units';
     }
 
-    function loadAndRenderProducts() {
-      let products = [];
-      try { products = JSON.parse(localStorage.getItem(PSE_STORAGE_KEY)) || []; }
-      catch(e) { products = []; }
-
+    function renderProducts(products) {
       let grid = document.getElementById('product-grid');
-
-      // Only show products the admin has set as visible
-      products = products.filter(function(p) { return p.visible !== false; });
+      products  = products.filter(p => p.visible !== false);
 
       if (products.length === 0) {
         grid.innerHTML = `
@@ -677,10 +632,7 @@
       }
 
       let html = '';
-
       products.forEach(function(p) {
-
-        // Determine stock label and whether it's low
         let isLow     = p.stock > 0 && p.stock <= (p.lowAt || 10);
         let isOut     = p.stock === 0;
         let unitLabel = getUnitLabel(p);
@@ -697,16 +649,13 @@
           stockClass = 'stock';
         }
 
-        // Image or emoji placeholder
         let imgHtml = p.image
-          ? `<img src="${p.image}" alt="${p.name}"
-               style="width:100%;height:150px;object-fit:cover;border-radius:5px;margin-bottom:10px;"/>`
+          ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:150px;object-fit:cover;border-radius:5px;margin-bottom:10px;"/>`
           : `<div class="img-placeholder">📦</div>`;
 
-        // Disable click if out of stock
         let clickAttr = isOut
           ? `onclick="showToast('⛔ ${p.name} is out of stock')"`
-          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut}, ${p.stock}, '${unitLabel}')"`;
+          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut}, ${p.stock}, '${unitLabel}', '${p.firestoreId}')"`; 
 
         html += `
           <div class="product-card" ${clickAttr} style="${isOut ? 'opacity:0.55;cursor:not-allowed;' : ''}">
@@ -715,15 +664,72 @@
             <p class="tap-hint" style="font-size:11px;color:#aaa;margin-bottom:3px;">${p.category}</p>
             <p class="${stockClass}">${stockText}</p>
             <p class="tap-hint">${isOut ? 'Currently unavailable' : 'Tap to add to cart'}</p>
-          </div>
-        `;
+          </div>`;
       });
 
       grid.innerHTML = html;
     }
 
-    // Render products on load
-    loadAndRenderProducts();
+    // Live real-time listener — auto-refreshes when admin changes stock
+    onSnapshot(collection(db, 'products'), (snapshot) => {
+      let products = snapshot.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+      renderProducts(products);
+      // also store in window for placeOrder to use
+      window._liveProducts = products;
+    });
+
+    // ============================================================
+    // PLACE ORDER — saves to Firebase
+    // ============================================================
+    window.placeOrderFirebase = async function() {
+      let cartItems = window._cartItems || [];
+      if (cartItems.length === 0) return;
+
+      let products = window._liveProducts || [];
+
+      // Stock validation
+      for (let item of cartItems) {
+        let product = products.find(p => p.name === item.name);
+        if (!product) {
+          showToast('⚠️ "' + item.name + '" is no longer available.');
+          return;
+        }
+        if (item.quantity > product.stock) {
+          showToast('⚠️ Only ' + product.stock + ' ' + getUnitLabel(product) + ' of "' + item.name + '" left.');
+          return;
+        }
+      }
+
+      // Deduct stock in Firestore
+      for (let item of cartItems) {
+        let product = products.find(p => p.name === item.name);
+        if (product && product.firestoreId) {
+          let newStock = product.stock - item.quantity;
+          if (newStock < 0) newStock = 0;
+          await updateDoc(doc(db, 'products', product.firestoreId), { stock: newStock });
+        }
+      }
+
+      // Save order to Firestore
+      let phone    = sessionStorage.getItem('customer_phone')  || '';
+      let shopName = sessionStorage.getItem('customer_shop')   || '';
+      let area     = sessionStorage.getItem('customer_area')   || '';
+
+      await addDoc(collection(db, 'orders'), {
+        phone:     phone,
+        shopName:  shopName,
+        area:      area,
+        items:     cartItems.map(i => ({ name: i.name, quantity: i.quantity, comment: i.comment || '', unit: i.unit || 'units' })),
+        status:    'new',
+        timestamp: Date.now()
+      });
+
+      // Clear cart
+      window._cartItems = [];
+      if (typeof updateCartDisplay === 'function') updateCartDisplay();
+      if (typeof closeCart === 'function') closeCart();
+      showToast('✅ Order placed! We will contact you soon.');
+    };
 
   </script>
 

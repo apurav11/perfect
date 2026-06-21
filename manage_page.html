@@ -742,8 +742,24 @@
   ===================================================== */
   const ADMIN_USERNAME  = 'perfectsales';
   const ADMIN_PASSWORD  = 'apurav0085';
-  const STORAGE_KEY     = 'pse_products';
-  const ORDERS_KEY      = 'pse_orders';
+
+  /* =====================================================
+     FIREBASE SETUP
+  ===================================================== */
+  // Firebase is loaded via module script at bottom — these are async wrappers
+  // that the rest of the admin code calls exactly like before.
+
+  async function loadProducts() {
+    return await window._fbGetProducts();
+  }
+
+  async function saveProducts() { /* handled per-operation via Firebase */ }
+
+  async function loadOrders() {
+    return await window._fbGetOrders();
+  }
+
+  async function saveOrders() { /* handled per-operation via Firebase */ }
 
   /* ---- Unit label is now stored PER PRODUCT (e.g. "lari", "carton", "box") ----
      Falls back to the old category map only for products saved before this change. */
@@ -807,18 +823,6 @@
   }
 
   /* =====================================================
-     PRODUCT DATA
-  ===================================================== */
-  function loadProducts() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch(e) { return []; }
-  }
-
-  function saveProducts(arr) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-  }
-
-  /* =====================================================
      IMAGE PREVIEW
   ===================================================== */
   let imageBase64 = '';
@@ -838,7 +842,7 @@
   /* =====================================================
      ADD PRODUCT
   ===================================================== */
-  function addProduct() {
+  async function addProduct() {
     let name     = document.getElementById('f-name').value.trim();
     let category = document.getElementById('f-category').value;
     let stock    = parseInt(document.getElementById('f-stock').value);
@@ -850,23 +854,16 @@
     if (isNaN(stock) || stock < 0) { showFormMsg('error', '⚠️ Please enter a valid stock quantity.'); return; }
     if (!unit)     { showFormMsg('error', '⚠️ Please enter a stock unit (e.g. lari, carton, box).'); return; }
 
-    let products = loadProducts();
+    let products = await loadProducts();
     if (products.find(p => p.name.toLowerCase() === name.toLowerCase())) {
       showFormMsg('error', '⚠️ A product with this name already exists.'); return;
     }
 
-    products.push({
-      id:      Date.now(),
-      name:    name,
-      category:category,
-      stock:   stock,
-      unit:    unit,          // <-- new: free-text unit, e.g. "lari", "carton", "box"
-      lowAt:   lowAt,
+    await window._fbAddProduct({
+      name, category, stock, unit, lowAt,
       image:   imageBase64 || '',
-      visible: true          // <-- new: visible by default
+      visible: true
     });
-
-    saveProducts(products);
 
     document.getElementById('f-name').value     = '';
     document.getElementById('f-category').value = '';
@@ -878,89 +875,77 @@
     document.getElementById('img-preview-wrap').style.display = 'none';
 
     showFormMsg('success', '✅ "' + name + '" added! Customers will see it after refreshing.');
-    renderInventory();
+    await renderInventory();
     showToast('✅ ' + name + ' added!', 'green');
   }
 
   /* =====================================================
      TOGGLE VISIBILITY
   ===================================================== */
-  function toggleVisibility(id) {
-    let products = loadProducts();
-    let p = products.find(p => p.id === id);
+  async function toggleVisibility(id) {
+    let products = await loadProducts();
+    let p = products.find(p => p.firestoreId === id);
     if (!p) return;
-    p.visible = !p.visible;
-    saveProducts(products);
-    renderInventory();
-    showToast(p.visible ? '👁️ ' + p.name + ' is now visible' : '🙈 ' + p.name + ' hidden from shop', p.visible ? 'green' : '');
+    let newVisible = !p.visible;
+    await window._fbUpdateProduct(id, { visible: newVisible });
+    await renderInventory();
+    showToast(newVisible ? '👁️ ' + p.name + ' is now visible' : '🙈 ' + p.name + ' hidden from shop', newVisible ? 'green' : '');
   }
 
-  /* =====================================================
-     ADJUST STOCK
-  ===================================================== */
-  function adjustStock(id, type) {
+  async function adjustStock(id, type) {
     let inputEl = document.getElementById('qty-' + id);
     let qty     = parseInt(inputEl.value);
-
     if (isNaN(qty) || qty <= 0) { showToast('⚠️ Enter a valid quantity', 'red'); return; }
 
-    let products = loadProducts();
-    let product  = products.find(p => p.id === id);
+    let products = await loadProducts();
+    let product  = products.find(p => p.firestoreId === id);
     if (!product) return;
 
     let unitLabel = getUnitLabel(product);
+    let newStock;
 
     if (type === 'add') {
-      product.stock += qty;
+      newStock = product.stock + qty;
       showToast('✅ Added ' + qty + ' ' + unitLabel + ' to ' + product.name, 'green');
     } else {
-      if (qty > product.stock) {
-        showToast('⚠️ Cannot remove more than ' + product.stock + ' ' + unitLabel, 'red'); return;
-      }
-      product.stock -= qty;
+      if (qty > product.stock) { showToast('⚠️ Cannot remove more than ' + product.stock + ' ' + unitLabel, 'red'); return; }
+      newStock = product.stock - qty;
       showToast('🔻 Removed ' + qty + ' ' + unitLabel + ' from ' + product.name, '');
     }
 
     inputEl.value = '';
-    saveProducts(products);
-    renderInventory();
+    await window._fbUpdateProduct(id, { stock: newStock });
+    await renderInventory();
   }
 
-  /* =====================================================
-     EDIT UNIT NAME (e.g. change "carton" to "box" anytime)
-  ===================================================== */
-  function editUnit(id) {
-    let products = loadProducts();
-    let product  = products.find(p => p.id === id);
+  async function editUnit(id) {
+    let products = await loadProducts();
+    let product  = products.find(p => p.firestoreId === id);
     if (!product) return;
 
-    let current  = getUnitLabel(product);
-    let newUnit  = prompt('Stock unit for "' + product.name + '" (e.g. lari, carton, box, packet):', current);
-    if (newUnit === null) return; // cancelled
+    let current = getUnitLabel(product);
+    let newUnit = prompt('Stock unit for "' + product.name + '" (e.g. lari, carton, box, packet):', current);
+    if (newUnit === null) return;
     newUnit = newUnit.trim();
     if (!newUnit) { showToast('⚠️ Unit cannot be empty', 'red'); return; }
 
-    product.unit = newUnit;
-    saveProducts(products);
-    renderInventory();
+    await window._fbUpdateProduct(id, { unit: newUnit });
+    await renderInventory();
     showToast('✅ Unit updated to "' + newUnit + '" for ' + product.name, 'green');
   }
 
-  /* =====================================================
-     DELETE PRODUCT
-  ===================================================== */
-  function deleteProduct(id, name) {
+  async function deleteProduct(id, name) {
     if (!confirm('Delete "' + name + '"?\nThis will remove it from the shop.')) return;
-    saveProducts(loadProducts().filter(p => p.id !== id));
-    renderInventory();
+    await window._fbDeleteProduct(id);
+    await renderInventory();
     showToast('🗑️ ' + name + ' removed.', 'red');
   }
 
   /* =====================================================
      RENDER INVENTORY TABLE
   ===================================================== */
-  function renderInventory() {
-    let products = loadProducts();
+  async function renderInventory() {
+    let products = await loadProducts();
     let wrap     = document.getElementById('inventory-wrap');
     let countEl  = document.getElementById('prod-count');
 
@@ -981,17 +966,18 @@
     `;
 
     products.forEach(function(p) {
+      let fid       = p.firestoreId;
       let unitLabel = getUnitLabel(p);
       let badgeClass, badgeText;
       if (p.stock === 0)           { badgeClass = 'out'; badgeText = 'Out of Stock'; }
       else if (p.stock <= p.lowAt) { badgeClass = 'low'; badgeText = 'Low: ' + p.stock + ' ' + unitLabel; }
       else                         { badgeClass = 'ok';  badgeText = 'In Stock: ' + p.stock + ' ' + unitLabel; }
 
-      let thumbHtml = p.image
+      let thumbHtml  = p.image
         ? `<img class="prod-thumb" src="${p.image}" alt="${p.name}"/>`
         : `<div class="prod-thumb-placeholder">📦</div>`;
 
-      let isVisible = (p.visible !== false); // default true
+      let isVisible = (p.visible !== false);
 
       html += `
         <tr class="${isVisible ? '' : 'hidden-product'}">
@@ -1001,13 +987,13 @@
           <td data-label="Stock">
             <span class="stock-badge ${badgeClass}">${badgeText}</span>
             <button class="sc-btn" style="padding:3px 8px;font-size:11px;margin-left:6px;"
-              onclick="editUnit(${p.id})" title="Change unit name">✏️ unit</button>
+              onclick="editUnit('${fid}')" title="Change unit name">✏️ unit</button>
           </td>
           <td data-label="Visible">
             <div class="vis-toggle">
               <label class="toggle-switch">
                 <input type="checkbox" ${isVisible ? 'checked' : ''}
-                  onchange="toggleVisibility(${p.id})"/>
+                  onchange="toggleVisibility('${fid}')"/>
                 <span class="toggle-track"></span>
               </label>
               <span class="vis-label ${isVisible ? 'on' : 'off'}">${isVisible ? 'Shown' : 'Hidden'}</span>
@@ -1015,14 +1001,14 @@
           </td>
           <td data-label="Adjust Stock">
             <div class="stock-controls">
-              <input type="number" id="qty-${p.id}" min="1" placeholder="${unitLabel}"/>
-              <button class="sc-btn add"    onclick="adjustStock(${p.id}, 'add')">+ Add</button>
-              <button class="sc-btn remove" onclick="adjustStock(${p.id}, 'remove')">− Remove</button>
+              <input type="number" id="qty-${fid}" min="1" placeholder="${unitLabel}"/>
+              <button class="sc-btn add"    onclick="adjustStock('${fid}', 'add')">+ Add</button>
+              <button class="sc-btn remove" onclick="adjustStock('${fid}', 'remove')">− Remove</button>
             </div>
           </td>
           <td data-label="Actions">
             <div class="action-btns">
-              <button class="del-btn" onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g,"\\'")}')">🗑️ Delete</button>
+              <button class="del-btn" onclick="deleteProduct('${fid}', '${p.name.replace(/'/g,"\\'")}')">🗑️ Delete</button>
             </div>
           </td>
         </tr>
@@ -1036,21 +1022,13 @@
   /* =====================================================
      ORDER DATA
   ===================================================== */
-  function loadOrders() {
-    try { return JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; }
-    catch(e) { return []; }
+  async function getNewOrderCount() {
+    let orders = await loadOrders();
+    return orders.filter(o => o.status === 'new').length;
   }
 
-  function saveOrders(arr) {
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(arr));
-  }
-
-  function getNewOrderCount() {
-    return loadOrders().filter(o => o.status === 'new').length;
-  }
-
-  function updateOrderBadge() {
-    let count = getNewOrderCount();
+  async function updateOrderBadge() {
+    let count = await getNewOrderCount();
     let badge = document.getElementById('new-order-badge');
     if (count > 0) {
       badge.textContent = count;
@@ -1063,13 +1041,12 @@
   /* =====================================================
      RENDER ORDERS
   ===================================================== */
-  function renderOrders() {
-    let orders  = loadOrders();
+  async function renderOrders() {
+    let orders  = await loadOrders();
     let search  = (document.getElementById('order-search')?.value || '').toLowerCase().trim();
     let wrap    = document.getElementById('orders-wrap');
     let countEl = document.getElementById('order-count');
 
-    // Filter
     let filtered = orders;
     if (search) {
       filtered = orders.filter(o =>
@@ -1079,7 +1056,6 @@
       );
     }
 
-    // Sort: newest first
     filtered = [...filtered].sort((a, b) => b.timestamp - a.timestamp);
 
     countEl.textContent = orders.length + ' order' + (orders.length !== 1 ? 's' : '');
@@ -1098,6 +1074,7 @@
     let html = '';
 
     filtered.forEach(function(order) {
+      let fid         = order.firestoreId;
       let statusLabel = order.status === 'new' ? 'New' : order.status === 'seen' ? 'Seen' : 'Completed';
       let statusClass = order.status;
       let date        = new Date(order.timestamp);
@@ -1113,8 +1090,8 @@
       `).join('');
 
       html += `
-        <div class="order-card" id="order-card-${order.id}">
-          <div class="order-header" onclick="toggleOrderCard('${order.id}')">
+        <div class="order-card" id="order-card-${fid}">
+          <div class="order-header" onclick="toggleOrderCard('${fid}')">
             <div class="order-meta">
               <div class="order-shop">🏪 ${order.shopName}</div>
               <div class="order-contact">📞 +91 ${order.phone} &nbsp;|&nbsp; 📍 ${order.area}</div>
@@ -1122,26 +1099,26 @@
             <div class="order-right">
               <span class="order-time">${dateStr}, ${timeStr}</span>
               <span class="order-status ${statusClass}">${statusLabel}</span>
-              <span class="order-chevron" id="chev-${order.id}">▼</span>
+              <span class="order-chevron" id="chev-${fid}">▼</span>
             </div>
           </div>
-          <div class="order-body" id="body-${order.id}">
+          <div class="order-body" id="body-${fid}">
             <table class="order-items-table">
               <thead><tr><th>Product</th><th style="text-align:center;">Qty</th><th>Note</th></tr></thead>
               <tbody>${itemsHtml}</tbody>
             </table>
             <div class="order-actions">
               <button class="status-btn mark-seen"
-                onclick="setOrderStatus('${order.id}', 'seen')"
+                onclick="setOrderStatus('${fid}', 'seen')"
                 ${order.status !== 'new' ? 'style="opacity:0.4;pointer-events:none;"' : ''}>
                 👁️ Mark as Seen
               </button>
               <button class="status-btn mark-complete"
-                onclick="setOrderStatus('${order.id}', 'complete')"
+                onclick="setOrderStatus('${fid}', 'complete')"
                 ${order.status === 'complete' ? 'style="opacity:0.4;pointer-events:none;"' : ''}>
                 ✅ Mark Complete
               </button>
-              <button class="status-btn del-order" onclick="deleteOrder('${order.id}')">
+              <button class="status-btn del-order" onclick="deleteOrder('${fid}')">
                 🗑️ Delete
               </button>
             </div>
@@ -1153,7 +1130,6 @@
     wrap.innerHTML = html;
   }
 
-  /* toggle expand/collapse order card */
   function toggleOrderCard(id) {
     let body = document.getElementById('body-' + id);
     let chev = document.getElementById('chev-' + id);
@@ -1164,27 +1140,24 @@
   /* =====================================================
      ORDER ACTIONS
   ===================================================== */
-  function setOrderStatus(id, status) {
-    let orders = loadOrders();
-    let o = orders.find(o => o.id === id);
-    if (!o) return;
-    o.status = status;
-    saveOrders(orders);
-    renderOrders();
+  async function setOrderStatus(id, status) {
+    await window._fbUpdateOrder(id, { status });
+    await renderOrders();
     showToast(status === 'complete' ? '✅ Order marked complete' : '👁️ Order marked as seen', status === 'complete' ? 'green' : '');
   }
 
-  function deleteOrder(id) {
+  async function deleteOrder(id) {
     if (!confirm('Delete this order? This cannot be undone.')) return;
-    saveOrders(loadOrders().filter(o => o.id !== id));
-    renderOrders();
+    await window._fbDeleteOrder(id);
+    await renderOrders();
     showToast('🗑️ Order deleted.', 'red');
   }
 
-  function clearAllOrders() {
+  async function clearAllOrders() {
     if (!confirm('Clear ALL orders? This cannot be undone.')) return;
-    saveOrders([]);
-    renderOrders();
+    let orders = await loadOrders();
+    for (let o of orders) { await window._fbDeleteOrder(o.firestoreId); }
+    await renderOrders();
     showToast('🗑️ All orders cleared.', 'red');
   }
 
@@ -1209,11 +1182,66 @@
   /* =====================================================
      INIT
   ===================================================== */
-  function initAdmin() {
-    renderInventory();
-    updateOrderBadge();
+  async function initAdmin() {
+    await renderInventory();
+    await updateOrderBadge();
   }
 
+</script>
+
+<!-- ===== FIREBASE MODULE for manage_page ===== -->
+<script type="module">
+  import { initializeApp }                          from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+  import { getFirestore, collection, getDocs,
+           addDoc, doc, updateDoc, deleteDoc,
+           query, orderBy }                         from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBJYY2RhpJUmoyPRpOgGTaRN1_iHDS861Y",
+    authDomain:        "perfect-sales-c5315.firebaseapp.com",
+    projectId:         "perfect-sales-c5315",
+    storageBucket:     "perfect-sales-c5315.firebasestorage.app",
+    messagingSenderId: "910912966286",
+    appId:             "1:910912966286:web:0d366f71e17347ec4bc3df",
+    measurementId:     "G-8ZKJ80YEKZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ---- Products ----
+  window._fbGetProducts = async () => {
+    let snap = await getDocs(collection(db, 'products'));
+    return snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+  };
+
+  window._fbAddProduct = async (data) => {
+    await addDoc(collection(db, 'products'), data);
+  };
+
+  window._fbUpdateProduct = async (id, data) => {
+    await updateDoc(doc(db, 'products', id), data);
+  };
+
+  window._fbDeleteProduct = async (id) => {
+    await deleteDoc(doc(db, 'products', id));
+  };
+
+  // ---- Orders ----
+  window._fbGetOrders = async () => {
+    let snap = await getDocs(collection(db, 'orders'));
+    return snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+  };
+
+  window._fbUpdateOrder = async (id, data) => {
+    await updateDoc(doc(db, 'orders', id), data);
+  };
+
+  window._fbDeleteOrder = async (id) => {
+    await deleteDoc(doc(db, 'orders', id));
+  };
+
+  console.log('✅ Firebase connected to manage_page');
 </script>
 </body>
 </html>
