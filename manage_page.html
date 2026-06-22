@@ -370,26 +370,67 @@
        ORDERS SECTION
     ===================================================== */
     .orders-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       margin-bottom: 16px;
-      gap: 10px;
-      flex-wrap: wrap;
     }
 
-    .orders-toolbar input[type="text"] {
-      padding: 9px 13px;
+    /* 4-column search grid */
+    .order-search-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 700px) {
+      .order-search-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 420px) {
+      .order-search-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Each search field wrapper */
+    .osf-wrap {
+      display: flex;
+      align-items: center;
+      background: #fafafa;
       border: 1.5px solid var(--border);
       border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-      width: 260px;
-      color: var(--text);
-      background: #fafafa;
+      padding: 0 10px;
       transition: border-color 0.2s;
     }
-    .orders-toolbar input[type="text"]:focus { border-color: var(--gold); background: white; }
+    .osf-wrap:focus-within { border-color: var(--gold); background: white; }
+
+    .osf-icon { font-size: 15px; margin-right: 7px; flex-shrink: 0; }
+
+    .osf-wrap input,
+    .osf-wrap select {
+      border: none; outline: none;
+      font-size: 13px; color: var(--text);
+      background: transparent;
+      width: 100%; padding: 9px 0;
+    }
+    .osf-wrap select { cursor: pointer; }
+
+    /* Action buttons row */
+    .order-toolbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .clear-search-btn {
+      padding: 7px 14px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      border: 1px solid #b3d4ea;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .clear-search-btn:hover { background: var(--blue); color: white; }
 
     .clear-orders-btn {
       padding: 9px 16px;
@@ -567,7 +608,7 @@
         font-weight: bold; font-size: 11px; text-transform: uppercase;
         color: var(--muted); display: block; margin-bottom: 4px;
       }
-      .orders-toolbar input[type="text"] { width: 100%; }
+      .order-search-grid { grid-template-columns: 1fr; }
     }
 
   </style>
@@ -710,10 +751,48 @@
         <div class="card-body">
 
           <div class="orders-toolbar">
-            <input type="text" id="order-search"
-              placeholder="Search by shop name or phone..."
-              oninput="renderOrders()"/>
-            <button class="clear-orders-btn" onclick="clearAllOrders()">🗑️ Clear All Orders</button>
+
+            <div class="order-search-grid">
+
+              <div class="osf-wrap">
+                <span class="osf-icon">🏪</span>
+                <input type="text" id="search-name"
+                  placeholder="Shop name..."
+                  oninput="renderOrders()"/>
+              </div>
+
+              <div class="osf-wrap">
+                <span class="osf-icon">📞</span>
+                <input type="text" id="search-phone"
+                  placeholder="Phone number..."
+                  oninput="renderOrders()"
+                  inputmode="numeric"/>
+              </div>
+
+              <div class="osf-wrap">
+                <span class="osf-icon">📍</span>
+                <input type="text" id="search-area"
+                  placeholder="Area / address..."
+                  oninput="renderOrders()"/>
+              </div>
+
+              <div class="osf-wrap">
+                <span class="osf-icon">🏷️</span>
+                <select id="search-status" onchange="renderOrders()">
+                  <option value="">All statuses</option>
+                  <option value="new">New</option>
+                  <option value="seen">Seen</option>
+                  <option value="complete">Completed</option>
+                </select>
+              </div>
+
+            </div>
+
+            <div class="order-toolbar-actions">
+              <button class="clear-search-btn" onclick="clearOrderSearch()">✕ Clear Filters</button>
+              <button class="clear-orders-btn" onclick="clearAllOrders()">🗑️ Clear All Orders</button>
+            </div>
+
           </div>
 
           <div id="orders-wrap">
@@ -1043,30 +1122,36 @@
   ===================================================== */
   async function renderOrders() {
     let orders  = await loadOrders();
-    let search  = (document.getElementById('order-search')?.value || '').toLowerCase().trim();
     let wrap    = document.getElementById('orders-wrap');
     let countEl = document.getElementById('order-count');
 
-    let filtered = orders;
-    if (search) {
-      filtered = orders.filter(o =>
-        o.shopName.toLowerCase().includes(search) ||
-        o.phone.includes(search) ||
-        o.area.toLowerCase().includes(search)
-      );
-    }
+    let sName   = (document.getElementById('search-name')?.value   || '').toLowerCase().trim();
+    let sPhone  = (document.getElementById('search-phone')?.value  || '').trim();
+    let sArea   = (document.getElementById('search-area')?.value   || '').toLowerCase().trim();
+    let sStatus = (document.getElementById('search-status')?.value || '');
+
+    let anyFilter = sName || sPhone || sArea || sStatus;
+
+    let filtered = orders.filter(o => {
+      if (sName   && !o.shopName.toLowerCase().includes(sName))   return false;
+      if (sPhone  && !o.phone.includes(sPhone))                   return false;
+      if (sArea   && !o.area.toLowerCase().includes(sArea))       return false;
+      if (sStatus && o.status !== sStatus)                        return false;
+      return true;
+    });
 
     filtered = [...filtered].sort((a, b) => b.timestamp - a.timestamp);
 
-    countEl.textContent = orders.length + ' order' + (orders.length !== 1 ? 's' : '');
+    countEl.textContent = filtered.length + ' of ' + orders.length + ' order' + (orders.length !== 1 ? 's' : '');
     updateOrderBadge();
 
     if (filtered.length === 0) {
       wrap.innerHTML = `
         <div class="no-orders">
-          <div style="font-size:44px;margin-bottom:12px;">${search ? '🔍' : '📭'}</div>
-          <p>${search ? 'No orders match your search.' : 'No orders yet.'}</p>
-          ${!search ? '<p style="font-size:13px;margin-top:6px;">Orders from customers will appear here automatically.</p>' : ''}
+          <div style="font-size:44px;margin-bottom:12px;">${anyFilter ? '🔍' : '📭'}</div>
+          <p>${anyFilter ? 'No orders match your filters.' : 'No orders yet.'}</p>
+          ${anyFilter ? '<p style="font-size:13px;margin-top:6px;color:#aaa;">Try clearing filters to see all orders.</p>' : ''}
+          ${!anyFilter ? '<p style="font-size:13px;margin-top:6px;">Orders from customers will appear here automatically.</p>' : ''}
         </div>`;
       return;
     }
@@ -1151,6 +1236,14 @@
     await window._fbDeleteOrder(id);
     await renderOrders();
     showToast('🗑️ Order deleted.', 'red');
+  }
+
+  function clearOrderSearch() {
+    document.getElementById('search-name').value   = '';
+    document.getElementById('search-phone').value  = '';
+    document.getElementById('search-area').value   = '';
+    document.getElementById('search-status').value = '';
+    renderOrders();
   }
 
   async function clearAllOrders() {
