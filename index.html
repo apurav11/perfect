@@ -227,6 +227,63 @@
     /* ===== FOOTER ===== */
     footer { background-color: #2c3e50; color: #ccc; text-align: center; padding: 20px; font-size: 14px; }
 
+    /* ===== SEARCH BAR ===== */
+    .search-wrap {
+      display: flex; justify-content: center;
+      padding: 24px 20px 0;
+    }
+    .search-box {
+      display: flex; align-items: center;
+      width: 100%; max-width: 520px;
+      background: white; border: 2px solid #ddd;
+      border-radius: 50px; padding: 10px 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      transition: border-color 0.2s;
+    }
+    .search-box:focus-within { border-color: #2980b9; }
+    .search-box input {
+      flex: 1; border: none; outline: none;
+      font-size: 15px; color: #2c3e50;
+      background: transparent;
+    }
+    .search-box .search-icon { font-size: 18px; margin-right: 10px; color: #aaa; }
+    .search-box .clear-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 18px; color: #aaa; padding: 0 4px;
+      display: none;
+    }
+    .search-box .clear-btn.show { display: block; }
+    .search-result-count {
+      text-align: center; font-size: 13px;
+      color: #888; margin: 8px 0 0;
+    }
+
+    /* ===== TRY THESE SECTION ===== */
+    .try-these-wrap {
+      display: none;
+      padding: 18px 30px 0;
+    }
+    .try-these-wrap.show { display: block; }
+    .try-these-title {
+      font-size: 14px; color: #888;
+      margin-bottom: 10px; text-align: center;
+      letter-spacing: 0.5px;
+    }
+    .try-these-row {
+      display: flex; flex-wrap: wrap;
+      gap: 10px; justify-content: center;
+    }
+    .try-chip {
+      background: white; border: 1.5px solid #2980b9;
+      color: #2980b9; border-radius: 50px;
+      padding: 7px 16px; font-size: 13px;
+      cursor: pointer; transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .try-chip:hover {
+      background: #2980b9; color: white;
+    }
+
   </style>
 </head>
 <body>
@@ -261,7 +318,29 @@
   <!-- ===== PRODUCTS SECTION ===== -->
   <h2 class="section-title" id="products">Our Products</h2>
 
-  <!-- Product grid is rendered dynamically from localStorage by JS below -->
+  <!-- ===== SEARCH BAR ===== -->
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search products... (e.g. rice, oil, soap)"
+        oninput="onSearch()"
+        autocomplete="off"
+      />
+      <button class="clear-btn" id="search-clear" onclick="clearSearch()">✕</button>
+    </div>
+  </div>
+  <p class="search-result-count" id="search-count"></p>
+
+  <!-- ===== TRY THESE (random recommendations) ===== -->
+  <div class="try-these-wrap" id="try-these-wrap">
+    <p class="try-these-title">✨ Try these —</p>
+    <div class="try-these-row" id="try-these-row"></div>
+  </div>
+
+  <!-- Product grid is rendered dynamically from Firebase by JS below -->
   <div class="product-grid" id="product-grid"></div>
 
   <!-- ===== PRODUCT POPUP ===== -->
@@ -585,6 +664,136 @@
     // Run login check when page loads
     checkLogin();
 
+    // ============================================================
+    // FUZZY SEARCH + TRY THESE RECOMMENDATIONS
+    // ============================================================
+
+    /* ---- Fuzzy match: returns true if query letters appear in order in name ----
+       e.g. "ric" matches "Premium Rice", "ol" matches "Olive Oil"
+       Also does exact substring match first for better results */
+    function fuzzyMatch(query, name) {
+      let q = query.toLowerCase().trim();
+      let n = name.toLowerCase();
+      if (!q) return true;
+
+      // Exact substring match (highest priority)
+      if (n.includes(q)) return true;
+
+      // Letter-by-letter sequential match (fuzzy)
+      let qi = 0;
+      for (let i = 0; i < n.length && qi < q.length; i++) {
+        if (n[i] === q[qi]) qi++;
+      }
+      return qi === q.length;
+    }
+
+    /* ---- Score how well a product matches the query (higher = better) ---- */
+    function matchScore(query, name) {
+      let q = query.toLowerCase().trim();
+      let n = name.toLowerCase();
+      if (n.startsWith(q))  return 3;  // starts with query — best
+      if (n.includes(q))    return 2;  // contains query — good
+      if (fuzzyMatch(q, n)) return 1;  // fuzzy match — ok
+      return 0;
+    }
+
+    /* ---- Pick 3-4 random products for "Try These" (exclude current results) ---- */
+    let tryTheseTimer = null;
+
+    function refreshTryThese(allProducts, excludeNames) {
+      let pool = allProducts.filter(p =>
+        p.visible !== false &&
+        p.stock > 0 &&
+        !excludeNames.includes(p.name)
+      );
+      if (pool.length === 0) { hideTryThese(); return; }
+
+      // Shuffle
+      for (let i = pool.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+
+      let picks = pool.slice(0, Math.min(4, pool.length));
+      let row   = document.getElementById('try-these-row');
+      row.innerHTML = picks.map(p =>
+        `<div class="try-chip" onclick="chipSearch('${p.name.replace(/'/g,"\\'")}')">
+          ${p.name}
+        </div>`
+      ).join('');
+
+      document.getElementById('try-these-wrap').classList.add('show');
+    }
+
+    function hideTryThese() {
+      document.getElementById('try-these-wrap').classList.remove('show');
+    }
+
+    /* ---- Called when user clicks a Try These chip ---- */
+    function chipSearch(name) {
+      let input = document.getElementById('search-input');
+      input.value = name;
+      onSearch();
+      // scroll to results
+      document.getElementById('product-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ---- Main search handler ---- */
+    function onSearch() {
+      let query     = document.getElementById('search-input').value;
+      let clearBtn  = document.getElementById('search-clear');
+      let countEl   = document.getElementById('search-count');
+      let allProducts = (window._liveProducts || []).filter(p => p.visible !== false);
+
+      // Show/hide clear button
+      clearBtn.classList.toggle('show', query.length > 0);
+
+      if (!query.trim()) {
+        // No search — show all, hide count, hide Try These
+        renderProducts(allProducts);
+        countEl.textContent = '';
+        hideTryThese();
+        return;
+      }
+
+      // Score and filter
+      let scored = allProducts
+        .map(p => ({ p, score: matchScore(query, p.name) }))
+        .filter(x => x.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+      let results = scored.map(x => x.p);
+
+      // Render filtered results
+      renderProducts(results);
+
+      // Result count
+      if (results.length === 0) {
+        countEl.textContent = '😕 No products found for "' + query + '"';
+      } else {
+        countEl.textContent = results.length + ' result' + (results.length !== 1 ? 's' : '') + ' for "' + query + '"';
+      }
+
+      // Try These — show products NOT in results, refresh every 6s
+      let resultNames = results.map(p => p.name);
+      refreshTryThese(allProducts, resultNames);
+
+      clearTimeout(tryTheseTimer);
+      tryTheseTimer = setInterval(() => {
+        // only keep rotating if user is still searching
+        if (document.getElementById('search-input').value.trim()) {
+          refreshTryThese(allProducts, resultNames);
+        }
+      }, 6000);
+    }
+
+    /* ---- Clear search ---- */
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      clearTimeout(tryTheseTimer);
+      onSearch();
+    }
+
   </script>
 
   <!-- ===== FIREBASE SDK ===== -->
@@ -673,9 +882,15 @@
     // Live real-time listener — auto-refreshes when admin changes stock
     onSnapshot(collection(db, 'products'), (snapshot) => {
       let products = snapshot.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
-      renderProducts(products);
-      // also store in window for placeOrder to use
       window._liveProducts = products;
+
+      // Re-apply active search if any, otherwise show all
+      let query = (document.getElementById('search-input')?.value || '').trim();
+      if (query) {
+        onSearch(); // re-run search with fresh data
+      } else {
+        renderProducts(products);
+      }
     });
 
     // ============================================================
