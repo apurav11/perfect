@@ -51,15 +51,27 @@
 
     /* ===== PRODUCT GRID ===== */
     .product-grid {
-      display: flex; flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px; padding: 20px 30px 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px 30px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Mobile: exactly 2 columns always */
+    @media (max-width: 600px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 12px 12px 40px;
+      }
     }
 
     /* ===== PRODUCT CARD ===== */
     .product-card {
       background-color: white; border-radius: 8px;
-      width: 220px; padding: 15px; text-align: center;
+      padding: 15px; text-align: center;
       border: 1px solid #ddd; cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -78,6 +90,15 @@
     .product-card .stock { font-size: 13px; color: #888; margin-bottom: 8px; }
     .product-card .stock.low { color: #e74c3c; }
     .product-card .tap-hint { font-size: 12px; color: #aaa; }
+
+    @media (max-width: 600px) {
+      .product-card { padding: 10px; }
+      .product-card h3 { font-size: 13px; margin: 6px 0 3px; }
+      .product-card .stock { font-size: 11px; }
+      .product-card .tap-hint { font-size: 10px; }
+      .product-card .img-placeholder { height: 100px; font-size: 36px; }
+      .product-card img { height: 100px !important; }
+    }
 
     /* ===== PRODUCT POPUP OVERLAY ===== */
     .popup-overlay {
@@ -661,8 +682,85 @@
     }
 
 
-    // Run login check when page loads
-    checkLogin();
+    // ---- Unit label helper (regular script scope — Firebase module has its own copy) ----
+    function getUnitLabel(product) {
+      if (product && product.unit) return product.unit;
+      let map = { 'Food': 'lari', 'Juice': 'carton' };
+      return (product && map[product.category]) || 'units';
+    }
+
+    function renderProducts(products) {
+      let grid = document.getElementById('product-grid');
+      products  = products.filter(p => p.visible !== false);
+
+      if (products.length === 0) {
+        grid.innerHTML = `
+          <div style="text-align:center;padding:60px 20px;color:#aaa;grid-column:1/-1;">
+            <div style="font-size:48px;margin-bottom:14px;">📭</div>
+            <p style="font-size:16px;">No products available right now.<br>Check back soon!</p>
+          </div>`;
+        return;
+      }
+
+      // ---- Sort by category alphabetically, then by name within each category ----
+      let categoryOrder = ['Atta', 'Food', 'Juice', 'Oil', 'Soap', 'Other'];
+
+      products = [...products].sort((a, b) => {
+        let catA = (a.category || '').toLowerCase();
+        let catB = (b.category || '').toLowerCase();
+
+        // Get index in preferred order list (case-insensitive), unknown = 999
+        let idxA = categoryOrder.findIndex(c => c.toLowerCase() === catA);
+        let idxB = categoryOrder.findIndex(c => c.toLowerCase() === catB);
+        if (idxA === -1) idxA = 999;
+        if (idxB === -1) idxB = 999;
+
+        if (idxA !== idxB) return idxA - idxB;
+        // Same category — sort alphabetically by name
+        return a.name.localeCompare(b.name);
+      });
+
+      let html = '';
+      products.forEach(function(p) {
+        let isLow     = p.stock > 0 && p.stock <= (p.lowAt || 10);
+        let isOut     = p.stock === 0;
+        let unitLabel = getUnitLabel(p);
+        let stockText, stockClass;
+
+        if (isOut) {
+          stockText  = 'Out of Stock';
+          stockClass = 'stock low';
+        } else if (isLow) {
+          stockText  = 'Low: ' + p.stock + ' ' + unitLabel;
+          stockClass = 'stock low';
+        } else {
+          stockText  = p.stock + ' ' + unitLabel;
+          stockClass = 'stock';
+        }
+
+        let imgHtml = p.image
+          ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:150px;object-fit:cover;border-radius:5px;margin-bottom:10px;"/>`
+          : `<div class="img-placeholder">📦</div>`;
+
+        let clickAttr = isOut
+          ? `onclick="showToast('⛔ ${p.name} is out of stock')"`
+          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut}, ${p.stock}, '${unitLabel}', '${p.firestoreId || ''}')"`; 
+
+        html += `
+          <div class="product-card" ${clickAttr} style="${isOut ? 'opacity:0.55;cursor:not-allowed;' : ''}">
+            ${imgHtml}
+            <h3>${p.name}</h3>
+            <p class="tap-hint" style="font-size:11px;color:#aaa;margin-bottom:3px;">${p.category || ''}</p>
+            <p class="${stockClass}">${stockText}</p>
+            <p class="tap-hint">${isOut ? 'Unavailable' : 'Tap to order'}</p>
+          </div>`;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    // Expose to window so Firebase module + search can both call it
+    window.renderProducts = renderProducts;
 
     // ============================================================
     // FUZZY SEARCH + TRY THESE RECOMMENDATIONS
@@ -750,7 +848,7 @@
 
       if (!query.trim()) {
         // No search — show all, hide count, hide Try These
-        renderProducts(allProducts);
+        window.renderProducts(allProducts);
         countEl.textContent = '';
         hideTryThese();
         return;
@@ -765,7 +863,7 @@
       let results = scored.map(x => x.p);
 
       // Render filtered results
-      renderProducts(results);
+      window.renderProducts(results);
 
       // Result count
       if (results.length === 0) {
@@ -817,68 +915,6 @@
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
 
-    // ============================================================
-    // LOAD PRODUCTS FROM FIREBASE
-    // ============================================================
-
-    function getUnitLabel(product) {
-      if (product && product.unit) return product.unit;
-      let map = { 'Food': 'lari', 'Juice': 'carton' };
-      return (product && map[product.category]) || 'units';
-    }
-
-    function renderProducts(products) {
-      let grid = document.getElementById('product-grid');
-      products  = products.filter(p => p.visible !== false);
-
-      if (products.length === 0) {
-        grid.innerHTML = `
-          <div style="text-align:center;padding:60px 20px;color:#aaa;width:100%;">
-            <div style="font-size:48px;margin-bottom:14px;">📭</div>
-            <p style="font-size:16px;">No products available right now.<br>Check back soon!</p>
-          </div>`;
-        return;
-      }
-
-      let html = '';
-      products.forEach(function(p) {
-        let isLow     = p.stock > 0 && p.stock <= (p.lowAt || 10);
-        let isOut     = p.stock === 0;
-        let unitLabel = getUnitLabel(p);
-        let stockText, stockClass;
-
-        if (isOut) {
-          stockText  = 'Out of Stock';
-          stockClass = 'stock low';
-        } else if (isLow) {
-          stockText  = 'Low Stock: ' + p.stock + ' ' + unitLabel;
-          stockClass = 'stock low';
-        } else {
-          stockText  = 'In Stock: ' + p.stock + ' ' + unitLabel;
-          stockClass = 'stock';
-        }
-
-        let imgHtml = p.image
-          ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:150px;object-fit:cover;border-radius:5px;margin-bottom:10px;"/>`
-          : `<div class="img-placeholder">📦</div>`;
-
-        let clickAttr = isOut
-          ? `onclick="showToast('⛔ ${p.name} is out of stock')"`
-          : `onclick="openPopup('${p.name.replace(/'/g,"\\'")}', '${stockText}', ${isLow || isOut}, ${p.stock}, '${unitLabel}', '${p.firestoreId}')"`; 
-
-        html += `
-          <div class="product-card" ${clickAttr} style="${isOut ? 'opacity:0.55;cursor:not-allowed;' : ''}">
-            ${imgHtml}
-            <h3>${p.name}</h3>
-            <p class="tap-hint" style="font-size:11px;color:#aaa;margin-bottom:3px;">${p.category}</p>
-            <p class="${stockClass}">${stockText}</p>
-            <p class="tap-hint">${isOut ? 'Currently unavailable' : 'Tap to add to cart'}</p>
-          </div>`;
-      });
-
-      grid.innerHTML = html;
-    }
-
     // Live real-time listener — auto-refreshes when admin changes stock
     onSnapshot(collection(db, 'products'), (snapshot) => {
       let products = snapshot.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
@@ -887,9 +923,9 @@
       // Re-apply active search if any, otherwise show all
       let query = (document.getElementById('search-input')?.value || '').trim();
       if (query) {
-        onSearch(); // re-run search with fresh data
+        onSearch();
       } else {
-        renderProducts(products);
+        window.renderProducts(products);
       }
     });
 
