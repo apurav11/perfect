@@ -306,6 +306,78 @@
 
     .action-btns { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
+    /* ===== EDIT PRODUCT MODAL ===== */
+    .edit-modal-overlay {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000; align-items: center; justify-content: center;
+    }
+    .edit-modal-overlay.active { display: flex; }
+    .edit-modal-box {
+      background: white; border-radius: 14px;
+      padding: 30px 28px; width: 380px; max-width: 92vw;
+      position: relative; animation: popIn 0.2s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.88); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .edit-modal-box h3 {
+      font-size: 17px; color: var(--text);
+      margin-bottom: 20px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .edit-modal-box h3 span { color: var(--gold); }
+    .edit-modal-close {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none;
+      font-size: 20px; cursor: pointer; color: #aaa;
+    }
+    .edit-modal-close:hover { color: #333; }
+    .edit-field { margin-bottom: 16px; }
+    .edit-field label {
+      display: block; font-size: 13px;
+      color: #555; font-weight: bold; margin-bottom: 6px;
+    }
+    .edit-field input,
+    .edit-field select {
+      width: 100%; padding: 10px 13px;
+      font-size: 14px; border: 1.5px solid var(--border);
+      border-radius: 8px; outline: none;
+      color: var(--text); background: #fafafa;
+      transition: border-color 0.2s;
+    }
+    .edit-field input:focus,
+    .edit-field select:focus { border-color: var(--gold); background: white; }
+    .edit-modal-actions {
+      display: flex; gap: 10px; margin-top: 20px;
+    }
+    .edit-save-btn {
+      flex: 1; padding: 11px;
+      background: var(--text); color: white;
+      border: none; border-radius: 8px;
+      font-size: 15px; font-weight: bold; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .edit-save-btn:hover { background: #1a252f; }
+    .edit-cancel-btn {
+      padding: 11px 18px;
+      background: #f4f4f4; color: #666;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 15px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .edit-cancel-btn:hover { background: #e8e8e8; }
+    .edit-btn {
+      padding: 6px 12px; font-size: 12px; font-weight: bold;
+      background: var(--blue-soft); color: var(--blue);
+      border: 1px solid #b3d4ea; border-radius: 6px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .edit-btn:hover { background: var(--blue); color: white; }
+
     .del-btn {
       padding: 6px 10px; background: var(--red-soft); color: var(--red);
       border: 1px solid #f5c6cb; border-radius: 6px; font-size: 12px;
@@ -1013,6 +1085,54 @@
     showToast('✅ Unit updated to "' + newUnit + '" for ' + product.name, 'green');
   }
 
+  /* =====================================================
+     EDIT PRODUCT NAME & CATEGORY
+  ===================================================== */
+  let _editingFid = null;
+
+  function openEditModal(fid, currentName, currentCategory) {
+    _editingFid = fid;
+    document.getElementById('edit-modal-old-name').textContent = currentName;
+    document.getElementById('edit-name-input').value           = currentName;
+    document.getElementById('edit-category-input').value       = currentCategory;
+    document.getElementById('edit-modal-overlay').classList.add('active');
+    // Focus name field
+    setTimeout(() => document.getElementById('edit-name-input').focus(), 100);
+  }
+
+  function closeEditModal(e) {
+    // If called from overlay click, only close if clicking outside the box
+    if (e && e.target !== document.getElementById('edit-modal-overlay')) return;
+    document.getElementById('edit-modal-overlay').classList.remove('active');
+    _editingFid = null;
+  }
+
+  async function saveProductEdit() {
+    let newName = document.getElementById('edit-name-input').value.trim();
+    let newCat  = document.getElementById('edit-category-input').value;
+
+    if (!newName) { showToast('⚠️ Product name cannot be empty', 'red'); return; }
+    if (!newCat)  { showToast('⚠️ Please select a category', 'red'); return; }
+    if (!_editingFid) return;
+
+    await window._fbUpdateProduct(_editingFid, { name: newName, category: newCat });
+    document.getElementById('edit-modal-overlay').classList.remove('active');
+    _editingFid = null;
+    await renderInventory();
+    showToast('✅ Product updated successfully', 'green');
+  }
+
+  // Allow Enter key to save from modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('edit-modal-overlay').classList.contains('active')) {
+      saveProductEdit();
+    }
+    if (e.key === 'Escape' && document.getElementById('edit-modal-overlay').classList.contains('active')) {
+      document.getElementById('edit-modal-overlay').classList.remove('active');
+      _editingFid = null;
+    }
+  });
+
   async function deleteProduct(id, name) {
     if (!confirm('Delete "' + name + '"?\nThis will remove it from the shop.')) return;
     await window._fbDeleteProduct(id);
@@ -1034,6 +1154,9 @@
       wrap.innerHTML = '<div class="empty-state">No products yet. Add one above ↑</div>';
       return;
     }
+
+    // ---- Sort alphabetically by name ----
+    products = [...products].sort((a, b) => a.name.localeCompare(b.name));
 
     let html = `
       <table class="product-table">
@@ -1057,12 +1180,14 @@
         : `<div class="prod-thumb-placeholder">📦</div>`;
 
       let isVisible = (p.visible !== false);
+      let safeName  = p.name.replace(/'/g, "\\'");
+      let safeCat   = (p.category || '').replace(/'/g, "\\'");
 
       html += `
         <tr class="${isVisible ? '' : 'hidden-product'}">
           <td data-label="Image">${thumbHtml}</td>
           <td data-label="Product"><strong>${p.name}</strong></td>
-          <td data-label="Category">${p.category}</td>
+          <td data-label="Category">${p.category || '—'}</td>
           <td data-label="Stock">
             <span class="stock-badge ${badgeClass}">${badgeText}</span>
             <button class="sc-btn" style="padding:3px 8px;font-size:11px;margin-left:6px;"
@@ -1087,7 +1212,8 @@
           </td>
           <td data-label="Actions">
             <div class="action-btns">
-              <button class="del-btn" onclick="deleteProduct('${fid}', '${p.name.replace(/'/g,"\\'")}')">🗑️ Delete</button>
+              <button class="edit-btn" onclick="openEditModal('${fid}', '${safeName}', '${safeCat}')">✏️ Edit</button>
+              <button class="del-btn" onclick="deleteProduct('${fid}', '${safeName}')">🗑️ Delete</button>
             </div>
           </td>
         </tr>
@@ -1336,5 +1462,37 @@
 
   console.log('✅ Firebase connected to manage_page');
 </script>
+<!-- ===== EDIT PRODUCT MODAL ===== -->
+<div class="edit-modal-overlay" id="edit-modal-overlay" onclick="closeEditModal(event)">
+  <div class="edit-modal-box" id="edit-modal-box">
+    <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+    <h3>✏️ Edit Product — <span id="edit-modal-old-name"></span></h3>
+
+    <div class="edit-field">
+      <label>Product Name</label>
+      <input type="text" id="edit-name-input" placeholder="e.g. Premium Rice (5kg)"/>
+    </div>
+
+    <div class="edit-field">
+      <label>Category</label>
+      <select id="edit-category-input">
+        <option value="">— Select Category —</option>
+        <option>Food</option>
+        <option>Cigarettes</option>
+        <option>Juice</option>
+        <option>Atta</option>
+        <option>biscuits</option>
+        <option>Soaps</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="edit-modal-actions">
+      <button class="edit-cancel-btn" onclick="closeEditModal()">Cancel</button>
+      <button class="edit-save-btn" onclick="saveProductEdit()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
